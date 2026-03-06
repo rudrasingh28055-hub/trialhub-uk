@@ -7,6 +7,7 @@ export function saveMockUser(email: string) {
 
 export function getMockUser(): { email: string } | null {
   if (typeof window === "undefined") return null;
+
   const raw = localStorage.getItem(AUTH_KEY);
   if (!raw) return null;
 

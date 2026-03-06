@@ -1,20 +1,113 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 
-export default function OpportunityCard({ item }: any) {
+type Opportunity = {
+  id: string;
+  title: string | null;
+  description: string | null;
+  location_city: string | null;
+  type: string | null;
+  created_at: string | null;
+};
+
+function formatDate(dateString: string | null) {
+  if (!dateString) return "Just now";
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function getTypeColor(type: string | null) {
+  switch ((type || "").toUpperCase()) {
+    case "ACADEMY":
+      return "bg-violet-500/15 text-violet-300 border border-violet-400/20";
+    case "LEAGUE":
+      return "bg-emerald-500/15 text-emerald-300 border border-emerald-400/20";
+    default:
+      return "bg-blue-500/15 text-blue-300 border border-blue-400/20";
+  }
+}
+
+export default function OpportunityCard({
+  item,
+}: {
+  item: Opportunity;
+}) {
+  const [saved, setSaved] = useState(false);
+
   return (
-    <div className="border p-6 rounded-lg bg-white text-black">
-      <h2 className="text-xl font-bold">{item.title}</h2>
+    <div className="glass glow-card rounded-3xl p-5 transition duration-300 hover:-translate-y-1 hover:bg-white/[0.08]">
+      <div className="mb-4 flex items-start justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-violet-500 text-sm font-bold text-white">
+            {item.title?.charAt(0)?.toUpperCase() || "A"}
+          </div>
 
-      <p>{item.location_city}</p>
+          <div>
+            <div className="flex items-center gap-2">
+              <p className="font-semibold text-white">
+                {item.title || "Untitled opportunity"}
+              </p>
+              <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-300">
+                Verified
+              </span>
+            </div>
+            <p className="text-sm text-slate-400">
+              {item.location_city || "Location TBC"} • {formatDate(item.created_at)}
+            </p>
+          </div>
+        </div>
 
-      <p>{item.description}</p>
+        <button
+          onClick={() => setSaved(!saved)}
+          className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+            saved
+              ? "bg-white text-slate-950"
+              : "border border-white/10 bg-white/5 text-slate-300 hover:bg-white/10"
+          }`}
+        >
+          {saved ? "Saved" : "Save"}
+        </button>
+      </div>
 
-      <Link
-        href={`/opportunity/${item.id}`}
-        className="text-blue-600 mt-4 block"
-      >
-        View Details
-      </Link>
+      <div className="mb-4 flex flex-wrap gap-2">
+        <span className={`rounded-full px-3 py-1 text-xs font-semibold ${getTypeColor(item.type)}`}>
+          {(item.type || "TRIAL").toUpperCase()}
+        </span>
+        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300">
+          {item.location_city || "City TBC"}
+        </span>
+        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300">
+          Open now
+        </span>
+      </div>
+
+      <p className="line-clamp-3 text-sm leading-7 text-slate-300">
+        {item.description || "Open football opportunity for athletes looking for their next step."}
+      </p>
+
+      <div className="mt-5 flex items-center justify-between border-t border-white/10 pt-4">
+        <div className="flex items-center gap-2">
+          <button className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs font-medium text-slate-300 transition hover:bg-white/10">
+            Apply
+          </button>
+          <button className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs font-medium text-slate-300 transition hover:bg-white/10">
+            Share
+          </button>
+        </div>
+
+        <Link
+          href={`/opportunities/${item.id}`}
+          className="rounded-full bg-white px-4 py-2 text-xs font-semibold text-slate-950 transition hover:bg-slate-200"
+        >
+          View
+        </Link>
+      </div>
     </div>
   );
 }
