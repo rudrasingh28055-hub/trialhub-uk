@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 
@@ -208,7 +209,7 @@ export default function Home() {
                 value={searchCity}
                 onChange={(e) => setSearchCity(e.target.value)}
                 placeholder="e.g. London, Manchester"
-                className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none ring-0 transition focus:border-slate-900"
+                className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-900"
               />
             </div>
 
@@ -326,9 +327,12 @@ export default function Home() {
                   <span className="text-sm font-medium text-slate-500">
                     AthLink listing
                   </span>
-                  <button className="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-200">
+                  <Link
+                    href={`/opportunity/${item.id}`}
+                    className="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-200"
+                  >
                     View Details
-                  </button>
+                  </Link>
                 </div>
               </div>
             ))}
