@@ -1,64 +1,137 @@
 "use client";
 
-import Navbar from "../../components/Navbar";
-import { saveMockUser } from "../../lib/mockAuth";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "../../lib/supabase/client";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
   const router = useRouter();
+  const supabase = createClient();
 
-  function handleLogin(e: React.FormEvent) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    if (!email.trim()) return;
-    saveMockUser(email.trim());
-    router.push("/feed");
+    setMessage("");
+    setLoading(true);
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+
+      if (error) {
+        setMessage(error.message);
+        setLoading(false);
+        return;
+      }
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        setMessage("Login failed. Please try again.");
+        setLoading(false);
+        return;
+      }
+
+      // Ensure user record exists in public.users
+      const { error: userError } = await supabase.from("users").upsert({
+        id: user.id,
+        email: user.email!,
+        role: "athlete",
+        status: "active",
+      }, {
+        onConflict: "id"
+      });
+
+      if (userError) {
+        console.error("Failed to ensure user record:", userError);
+      }
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (!profile) {
+        router.push("/setup");
+        router.refresh();
+        return;
+      }
+
+      // Prioritize feed as the main landing experience
+      router.push("/feed");
+      router.refresh();
+    } catch (err) {
+      console.error("Login error:", err);
+      setMessage("An unexpected error occurred. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
-    <main className="min-h-screen text-white">
-      <Navbar />
+    <main className="min-h-screen bg-slate-950 px-6 py-16 text-white">
+      <div className="mx-auto max-w-md">
+        <div className="rounded-3xl border border-white/10 bg-white/5 p-8">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-300">
+            AthLink
+          </p>
+          <h1 className="mt-3 text-3xl font-bold">Login</h1>
+          <p className="mt-2 text-sm text-slate-400">
+            Sign in to access your athlete or club account.
+          </p>
 
-      <section className="mx-auto flex min-h-[calc(100vh-80px)] max-w-7xl items-center justify-center px-6 py-16">
-        <div className="grid w-full max-w-5xl gap-8 lg:grid-cols-2">
-          <div className="flex flex-col justify-center">
-            <div className="mb-4 inline-flex w-fit rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-medium text-slate-300">
-              Enter the AthLink network
+          <form onSubmit={handleLogin} className="mt-6 space-y-4">
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none placeholder:text-slate-500"
+              required
+            />
+
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none placeholder:text-slate-500"
+              required
+            />
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full rounded-2xl bg-blue-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-400 disabled:opacity-60"
+            >
+              {loading ? "Logging in..." : "Login"}
+            </button>
+          </form>
+
+          {message && (
+            <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-200">
+              {message}
             </div>
-            <h1 className="text-5xl font-bold leading-tight tracking-tight">
-              Login to your athlete feed.
-            </h1>
-            <p className="mt-5 max-w-xl text-lg leading-8 text-slate-400">
-              Start with a simple founder-mode login. Real auth comes next.
-            </p>
-          </div>
+          )}
 
-          <div className="glass glow-card rounded-[28px] p-8">
-            <h2 className="text-2xl font-semibold text-white">Sign in to AthLink</h2>
-
-            <form onSubmit={handleLogin} className="mt-8 space-y-5">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-blue-400"
-              />
-
-              <input
-                type="password"
-                placeholder="••••••••"
-                className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-blue-400"
-              />
-
-              <button className="glow-button w-full rounded-2xl bg-gradient-to-r from-blue-500 to-violet-500 px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90">
-                Login
-              </button>
-            </form>
-          </div>
+          <p className="mt-6 text-sm text-slate-400">
+            Don’t have an account?{" "}
+            <Link href="/signup" className="font-medium text-white underline">
+              Create one
+            </Link>
+          </p>
         </div>
-      </section>
+      </div>
     </main>
   );
 }

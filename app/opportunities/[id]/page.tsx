@@ -1,165 +1,156 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import Navbar from "../../../components/Navbar";
-import { supabase } from "../../../lib/supabaseClient";
-import { useParams } from "next/navigation";
-import Link from "next/link";
+import { createClient } from "../../../lib/supabase/server";
+import { notFound, redirect } from "next/navigation";
 
-type Opportunity = {
-  id: string;
-  title: string | null;
-  description: string | null;
-  location_city: string | null;
-  type: string | null;
-  created_at: string | null;
-};
+export default async function OpportunityDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ applied?: string; error?: string }>;
+}) {
+  const { id } = await params;
+  const { applied, error } = await searchParams;
 
-function formatDate(dateString: string | null) {
-  if (!dateString) return "New listing";
-  const date = new Date(dateString);
-  return date.toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-}
+  const supabase = await createClient();
 
-export default function OpportunityDetailPage() {
-  const params = useParams();
-  const id = params.id as string;
+  const { data: opportunity, error: opportunityError } = await supabase
+    .from("opportunities")
+    .select("id, title, description, location_city, type, created_at")
+    .eq("id", id)
+    .single();
 
-  const [opportunity, setOpportunity] = useState<Opportunity | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function loadOpportunity() {
-      const { data } = await supabase
-        .from("opportunities")
-        .select("id,title,description,location_city,type,created_at")
-        .eq("id", id)
-        .single();
-
-      setOpportunity(data || null);
-      setLoading(false);
-    }
-
-    if (id) loadOpportunity();
-  }, [id]);
-
-  if (loading) {
-    return (
-      <main className="min-h-screen text-white">
-        <Navbar />
-        <div className="mx-auto max-w-6xl px-6 py-16">
-          <div className="glass rounded-[30px] p-10">Loading opportunity...</div>
-        </div>
-      </main>
-    );
+  if (opportunityError || !opportunity) {
+    notFound();
   }
 
-  if (!opportunity) {
-    return (
-      <main className="min-h-screen text-white">
-        <Navbar />
-        <div className="mx-auto max-w-3xl px-6 py-20">
-          <div className="glass rounded-[28px] p-10 text-center">
-            <div className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">
-              Opportunity not found
-            </div>
-            <h1 className="mt-3 text-3xl font-bold text-white">This listing does not exist</h1>
-            <p className="mt-4 text-slate-400">
-              The opportunity may have been removed or the link may be incorrect.
-            </p>
-            <Link
-              href="/"
-              className="mt-8 inline-flex rounded-full bg-white px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-200"
-            >
-              Back to homepage
-            </Link>
-          </div>
-        </div>
-      </main>
-    );
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let alreadyApplied = false;
+
+  if (user) {
+    const { data: playerProfile } = await supabase
+      .from("player_profiles")
+      .select("id")
+      .eq("profile_id", user.id)
+      .maybeSingle();
+
+    if (playerProfile) {
+      const { data: applicationForThisOpportunity } = await supabase
+        .from("applications")
+        .select("id")
+        .eq("opportunity_id", id)
+        .eq("player_profile_id", playerProfile.id)
+        .limit(1)
+        .maybeSingle();
+
+      alreadyApplied = !!applicationForThisOpportunity;
+    }
+  }
+
+  async function applyToOpportunity() {
+    "use server";
+
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      redirect("/login");
+    }
+
+    const { data: playerProfile } = await supabase
+      .from("player_profiles")
+      .select("id")
+      .eq("profile_id", user.id)
+      .maybeSingle();
+
+    if (!playerProfile) {
+      redirect("/setup");
+    }
+
+    const { data: existingApplication } = await supabase
+      .from("applications")
+      .select("id")
+      .eq("opportunity_id", id)
+      .eq("player_profile_id", playerProfile.id)
+      .limit(1)
+      .maybeSingle();
+
+    if (existingApplication) {
+      redirect(`/opportunities/${id}?applied=1`);
+    }
+
+    const { error: insertError } = await supabase.from("applications").insert([
+      {
+        opportunity_id: id,
+        player_profile_id: playerProfile.id,
+        status: "pending",
+      },
+    ]);
+
+    if (insertError) {
+      redirect(`/opportunities/${id}?error=${encodeURIComponent(insertError.message)}`);
+    }
+
+    redirect(`/opportunities/${id}?applied=1`);
   }
 
   return (
     <main className="min-h-screen text-white">
       <Navbar />
 
-      <section className="mx-auto max-w-7xl px-6 py-16">
-        <div className="grid gap-8 lg:grid-cols-[1.4fr_0.6fr]">
-          <div className="glass glow-card rounded-[30px] p-8">
-            <div className="mb-5 flex flex-wrap items-center gap-3">
-              <span className="rounded-full bg-blue-500/15 px-3 py-1 text-xs font-semibold text-blue-300">
-                {(opportunity.type || "TRIAL").toUpperCase()}
-              </span>
-              <span className="rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-300">
-                ✓ Verified
-              </span>
-            </div>
+      <section className="mx-auto max-w-4xl px-6 py-12">
+        <div className="rounded-3xl border border-white/10 bg-white/5 p-8">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-300">
+            Opportunity
+          </p>
 
-            <h1 className="text-4xl font-bold tracking-tight text-white md:text-5xl">
-              {opportunity.title || "Untitled opportunity"}
-            </h1>
+          <h1 className="mt-3 text-4xl font-bold">{opportunity.title}</h1>
 
-            <div className="mt-6 grid gap-4 rounded-3xl border border-white/10 bg-white/5 p-5 md:grid-cols-3">
-              <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-                  Location
-                </div>
-                <div className="mt-2 text-sm font-medium text-white">
-                  {opportunity.location_city || "Location TBC"}
-                </div>
-              </div>
-
-              <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-                  Posted on
-                </div>
-                <div className="mt-2 text-sm font-medium text-white">
-                  {formatDate(opportunity.created_at)}
-                </div>
-              </div>
-
-              <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-                  Type
-                </div>
-                <div className="mt-2 text-sm font-medium text-white">
-                  {(opportunity.type || "TRIAL").toUpperCase()}
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-8">
-              <h2 className="text-2xl font-semibold text-white">About this opportunity</h2>
-              <p className="mt-4 whitespace-pre-line text-base leading-8 text-slate-300">
-                {opportunity.description || "No description provided yet."}
-              </p>
-            </div>
+          <div className="mt-4 text-sm text-slate-400">
+            {opportunity.location_city || "Unknown city"} · {opportunity.type || "Unknown type"}
           </div>
 
-          <div className="glass glow-card h-fit rounded-[30px] p-6">
-            <h3 className="text-2xl font-semibold text-white">Take action</h3>
-            <p className="mt-3 text-sm leading-6 text-slate-400">
-              Applications, shortlists and club communication will go here next.
-            </p>
+          {applied === "1" && (
+            <div className="mt-6 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-sm text-emerald-200">
+              You have already applied to this opportunity.
+            </div>
+          )}
 
-            <button className="glow-button mt-6 w-full rounded-2xl bg-gradient-to-r from-blue-500 to-violet-500 px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90">
-              Apply to Opportunity
-            </button>
+          {error && (
+            <div className="mt-6 rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-200">
+              {decodeURIComponent(error)}
+            </div>
+          )}
 
-            <button className="mt-3 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10">
-              Save Opportunity
-            </button>
+          <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-5 text-slate-300">
+            {opportunity.description || "No description provided."}
+          </div>
 
-            <Link
-              href="/feed"
-              className="mt-4 inline-flex w-full justify-center rounded-2xl border border-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-            >
-              Go to Feed
-            </Link>
+          <div className="mt-6">
+            {alreadyApplied ? (
+              <button
+                type="button"
+                disabled
+                className="rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-semibold text-slate-400"
+              >
+                Applied
+              </button>
+            ) : (
+              <form action={applyToOpportunity}>
+                <button
+                  type="submit"
+                  className="rounded-2xl bg-blue-500 px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-400"
+                >
+                  Apply now
+                </button>
+              </form>
+            )}
           </div>
         </div>
       </section>
