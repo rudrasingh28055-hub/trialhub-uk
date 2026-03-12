@@ -49,7 +49,11 @@ export async function GET() {
         text.includes('sacked') ||
         text.includes('appointed')
       
-      const isOtherSport = 
+      const isOtherSport =
+        text.includes('football manager') ||
+        text.includes('fm26') ||
+        text.includes('fm25') ||
+        text.includes('fmscout') ||
         text.includes('nba') ||
         text.includes('nfl') ||
         text.includes('nhl') ||

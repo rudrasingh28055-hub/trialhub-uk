@@ -549,12 +549,14 @@ export default function HomeClient({ opportunities, user, role, displayName }: H
                                         }} />
                                       )}
                                       <div className="font-bold" style={{ fontSize: "28px", fontFamily: "'Satoshi', sans-serif", color: "white" }}>
-                                        {match.score.home ?? "-"} - {match.score.away ?? "-"}
+                                        {(isLive || isFinished) && match.score.home !== null
+                                          ? `${match.score.home} - ${match.score.away}`
+                                          : "vs"}
                                       </div>
                                     </div>
-                                    <div className="text-sm mt-1" style={{ 
-                                      color: isLive ? "#EF4444" : "rgba(255,255,255,0.7)", 
-                                      fontFamily: "Inter, sans-serif" 
+                                    <div className="text-sm mt-1" style={{
+                                      color: isLive ? "#EF4444" : "rgba(255,255,255,0.7)",
+                                      fontFamily: "Inter, sans-serif"
                                     }}>
                                       {isLive && match.minute ? `${match.minute}' LIVE` : isFinished ? "FT" : ""}
                                     </div>
