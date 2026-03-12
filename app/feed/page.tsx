@@ -1,9 +1,10 @@
-import Navbar from "../../components/Navbar";
-import PageHeader from "../../components/layout/PageHeader";
-import { FeedContainer } from "../../components/feed/FeedContainer";
-import { createClient } from "../../lib/supabase/server";
+import Navbar from "@/components/Navbar";
+import PageHeader from "@/components/layout/PageHeader";
+import { FeedContainer } from "@/components/feed/FeedContainer";
+import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { colors, typography, styles, borderRadius } from "@/lib/design/tokens";
 
 export default async function FeedPage() {
   const supabase = await createClient();
@@ -31,17 +32,15 @@ export default async function FeedPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+    <main className="min-h-screen" style={{ backgroundColor: colors.black }}>
       <Navbar />
 
       <section className="relative mx-auto max-w-7xl px-6 py-12">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-900/10 to-slate-950/30" />
-
         <div className="relative">
           <div className="flex items-center justify-between">
             <PageHeader
-              eyebrow="Discovery"
-              title="Feed"
+              eyebrow="DISCOVERY"
+              title="FEED"
               subtitle={userRole === 'club' 
                 ? "Discover talent through player highlights and achievements"
                 : "Share your highlights and discover other players"
@@ -52,12 +51,22 @@ export default async function FeedPage() {
             {/* Create Post Button */}
             <Link
               href="/post/create"
-              className="rounded-full bg-gradient-to-r from-sky-500 to-indigo-500 px-6 py-3 text-sm font-semibold text-white hover:from-sky-400 hover:to-indigo-400 transition-all flex items-center gap-2 shadow-lg shadow-sky-500/20"
+              className="flex items-center gap-2 transition-all"
+              style={{ 
+                ...styles.pillBorder, 
+                backgroundColor: colors.accent, 
+                color: colors.white,
+                padding: "12px 24px",
+                fontSize: "14px",
+                fontWeight: "600",
+                fontFamily: typography.display,
+                ...styles.displayHeader
+              }}
             >
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              Create Post
+              CREATE POST
             </Link>
           </div>
 

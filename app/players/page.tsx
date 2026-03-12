@@ -1,8 +1,10 @@
-import Navbar from "../../components/Navbar";
-import PageHeader from "../../components/layout/PageHeader";
-import PlayerCard from "../../components/player/PlayerCard";
-import { createClient } from "../../lib/supabase/server";
+import AppLayout from "@/components/AppLayout";
+import Navbar from "@/components/Navbar";
+import PageHeader from "@/components/layout/PageHeader";
+import PlayerCard from "@/components/player/PlayerCard";
 import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { colors, typography, borderRadius, glassPanel, gradient, pitchGrid } from "@/lib/design/tokens";
 
 type SearchParams = Promise<{
   q?: string;

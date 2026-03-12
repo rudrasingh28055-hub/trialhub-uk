@@ -1,5 +1,5 @@
-import Navbar from "../../../components/Navbar";
-import PageHeader from "../../../components/layout/PageHeader";
+import Navbar from "@/components/Navbar"
+import PageHeader from "@/components/layout/PageHeader"
 import { createClient } from "../../../lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";

@@ -1,8 +1,10 @@
-import Navbar from "../../components/Navbar";
-import PageHeader from "../../components/layout/PageHeader";
-import { createClient } from "../../lib/supabase/server";
-import Link from "next/link";
+import AppLayout from "@/components/AppLayout";
+import Navbar from "@/components/Navbar";
+import PageHeader from "@/components/layout/PageHeader";
+import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import Link from "next/link";
+import { colors, typography, borderRadius, glassPanel, gradient, pitchGrid } from "@/lib/design/tokens";
 
 type ConversationRow = {
   id: string;
