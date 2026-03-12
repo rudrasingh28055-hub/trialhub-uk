@@ -246,11 +246,28 @@ function HighlightVideoPreview({
 
   const showNativeControls = showControls && !placingKeyframe;
 
+  if (!localPreviewUrl) {
+    return (
+      <div style={{ 
+        width: '100%', 
+        height: '300px', 
+        borderRadius: '12px', 
+        backgroundColor: '#000',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'rgba(255,255,255,0.3)'
+      }}>
+        <span>No preview available</span>
+      </div>
+    )
+  }
+
   return (
     <div className="mb-6 relative overflow-hidden" style={{ width: '100%', height: '300px', overflow: 'hidden', borderRadius: '12px', backgroundColor: colors.black }}>
       <video
         ref={videoRef}
-        key={localPreviewUrl}
+        key={localPreviewUrl || 'no-preview'}
         src={localPreviewUrl}
         controls={showNativeControls}
         playsInline
@@ -536,6 +553,8 @@ export function CreatePostComposer({ userId }: CreatePostComposerProps) {
   } | null>(null)
   const [aiStep, setAiStep] = useState('')
   const [aiError, setAiError] = useState('')
+  const [hasClickedAI, setHasClickedAI] = useState(false)
+  const [aiApplied, setAiApplied] = useState(false)
 
   useEffect(() => {
     return () => {
@@ -543,7 +562,24 @@ export function CreatePostComposer({ userId }: CreatePostComposerProps) {
     };
   }, [composer.localPreviewUrl]);
 
+  // Update video duration when video loads
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video) {
+      const handleLoadedMetadata = () => {
+        videoDurationRef.current = video.duration;
+      };
+      
+      video.addEventListener('loadedmetadata', handleLoadedMetadata);
+      
+      return () => {
+        video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      };
+    }
+  }, [composer.localPreviewUrl]);
+
   const videoRef = useRef<HTMLVideoElement>(null);
+const videoDurationRef = useRef<number>(47); // Default fallback duration
 
   const selectMode = (mode: ComposerMode) => {
     setComposer(prev => {
@@ -598,108 +634,97 @@ export function CreatePostComposer({ userId }: CreatePostComposerProps) {
 
   // AI Analysis function
   const analyseWithAI = async () => {
+    setHasClickedAI(true)
     setAiAnalysing(true)
-    setAiError('')
+    setAiStep('AI is watching your clip...')
+    
+    // Get video URL for Twelve Labs
+    // Prefer capped-1080p MP4 (requires mp4_support enabled on asset),
+    // fall back to HLS which is always available once the asset is ready
+    let videoUrl = ''
+    if (composer.highlight.muxPlaybackId) {
+      videoUrl = `https://stream.mux.com/${composer.highlight.muxPlaybackId}/capped-1080p.mp4`
+    } else if (composer.localPreviewUrl) {
+      videoUrl = composer.localPreviewUrl
+    }
+    
+    if (!videoUrl) {
+      setAiError('No video URL available for AI analysis')
+      setAiAnalysing(false)
+      setAiStep('')
+      return
+    }
     
     try {
-      const muxPlaybackId = composer.highlight.muxPlaybackId
-      if (!muxPlaybackId) {
-        alert('Please upload a video first')
+      const indexRes = await fetch('/api/twelvelabs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'index', videoUrl })
+      })
+      const { taskId, error, status } = await indexRes.json()
+      console.log('Index result:', { taskId, error, status })
+
+      if (error || !taskId) {
+        console.warn('Index failed:', error, 'status:', status)
+        setAiError(`AI indexing failed (${status || 'unknown'}). Add spotlight manually.`)
         setAiAnalysing(false)
+        setAiStep('')
         return
       }
-      
-      // Try these URL formats in order
-      const urlFormats = [
-        `https://stream.mux.com/${muxPlaybackId}/high.mp4`,
-        `https://stream.mux.com/${muxPlaybackId}/medium.mp4`,
-        `https://stream.mux.com/${muxPlaybackId}/low.mp4`
-      ]
-      
-      let success = false
-      for (const videoUrl of urlFormats) {
-        try {
-          await runTwelveLabsAnalysis(videoUrl)
-          success = true
-          break
-        } catch (error) {
-          console.log(`Failed with ${videoUrl}, trying next format...`)
-          continue
+
+      let videoId = null
+      let attempts = 0
+      while (!videoId && attempts < 20) {
+        await new Promise(r => setTimeout(r, 3000))
+        const statusRes = await fetch('/api/twelvelabs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'status', videoId: taskId })
+        })
+        const status = await statusRes.json()
+        console.log('Task status:', status.status)
+        if (status.status === 'ready') {
+          videoId = status.videoId
         }
+        attempts++
       }
-      
-      if (!success) {
-        setAiSuggestion(null)
-        setAiStep('')
+
+      if (!videoId) {
+        console.warn('Indexing timed out')
+        setAiError('AI analysis timed out. Add spotlight manually.')
         setAiAnalysing(false)
-        setAiError('AI analysis unavailable for this video. Add spotlight manually below.')
+        setAiStep('')
+        return
       }
+
+      setAiStep('Finding your best moment...')
+
+      const analyzeRes = await fetch('/api/twelvelabs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'analyze', videoId })
+      })
+      const result = await analyzeRes.json()
+      
+      if (result.found) {
+        setAiSuggestion({
+          startTime: result.startTime,
+          endTime: result.endTime,
+          description: result.description
+        })
+      } else {
+        setAiError('AI could not detect a clear highlight. Add spotlight manually.')
+      }
+      setAiStep('')
+      setAiAnalysing(false)
     } catch (error) {
       console.error('AI analysis error:', error)
+      setAiSuggestion(null)
+      setAiStep('')
       setAiAnalysing(false)
       setAiError('AI analysis unavailable for this video. Add spotlight manually below.')
     }
   }
-
-  const runTwelveLabsAnalysis = async (videoUrl: string) => {
-    setAiStep('AI is watching your clip...')
-    
-    const indexRes = await fetch('/api/twelvelabs', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'index', videoUrl })
-    })
-    const { taskId, error } = await indexRes.json()
-    
-    if (error || !taskId) {
-      console.error('Index failed:', error)
-      throw new Error('Failed to index video')
-    }
-
-    let videoId = null
-    let attempts = 0
-    while (!videoId && attempts < 20) {
-      await new Promise(r => setTimeout(r, 3000))
-      const statusRes = await fetch('/api/twelvelabs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'status', videoId: taskId })
-      })
-      const status = await statusRes.json()
-      console.log('Task status:', status.status)
-      if (status.status === 'ready') {
-        videoId = status.videoId
-      }
-      attempts++
-    }
-
-    if (!videoId) {
-      console.error('Indexing timed out')
-      setAiAnalysing(false)
-      return
-    }
-
-    setAiStep('Finding your best moment...')
-
-    const analyzeRes = await fetch('/api/twelvelabs', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'analyze', videoId })
-    })
-    const result = await analyzeRes.json()
-    
-    if (result.found) {
-      setAiSuggestion({
-        startTime: result.startTime,
-        endTime: result.endTime,
-        description: result.description
-      })
-    } else {
-      alert('AI could not detect a clear highlight. Try adding a spotlight manually.')
-    }
-    setAiStep('')
-    setAiAnalysing(false)
-  };
 
   // Trim helpers
   const updateTrimStart = (time: number) => updateHighlight({ trimStart: time });
@@ -1331,16 +1356,129 @@ export function CreatePostComposer({ userId }: CreatePostComposerProps) {
                       {/* Video Preview */}
                       <div className="mb-6">
                         {composer.highlight.muxPlaybackId ? (
-                          <MuxPlayer
-                            playbackId={composer.highlight.muxPlaybackId}
-                            style={{ 
-                              width: '100%', 
-                              height: '300px',
-                              borderRadius: '16px'
-                            }}
-                            autoPlay={false}
-                            muted={false}
-                          />
+  <div style={{ position: 'relative', width: '100%', height: '300px', borderRadius: '16px', overflow: 'hidden' }}>
+    <MuxPlayer
+      playbackId={composer.highlight.muxPlaybackId}
+      style={{ 
+        width: '100%', 
+        height: '300px',
+        borderRadius: '16px'
+      }}
+      autoPlay={false}
+      muted={false}
+      onDurationChange={(evt: any) => {
+        const duration = evt?.detail?.duration ?? evt?.target?.duration ?? 0
+        if (duration > 0) {
+          videoDurationRef.current = duration
+          updateHighlight({ duration: duration })
+        }
+      }}
+      onLoadedMetadata={(evt: any) => {
+        const duration = evt?.target?.duration ?? evt?.detail?.duration ?? 0
+        if (duration > 0) {
+          videoDurationRef.current = duration
+          updateHighlight({ duration: duration })
+        }
+      }}
+    />
+    {/* Spotlight overlay for Mux videos */}
+    {(() => {
+      const spotlight = composer.highlight.spotlight
+      const currentTime = composer.highlight.currentTime || 0
+      const canShow = !!spotlight && isSpotlightVisible(spotlight, currentTime)
+      const spotlightPos = spotlight && canShow 
+        ? interpolateSpotlightPosition(spotlight, currentTime) 
+        : null
+      
+      if (!canShow || !spotlightPos || !spotlight) return null
+      
+      return (
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 20 }}>
+          {spotlight.style === 'soft_white' && (
+            <>
+              <div style={{
+                position: 'absolute',
+                width: 128, height: 128,
+                borderRadius: '50%',
+                opacity: 0.3,
+                left: `${spotlightPos.x}%`,
+                top: `${spotlightPos.y}%`,
+                transform: 'translate(-50%, -50%)',
+                background: 'radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.4) 30%, transparent 70%)',
+                filter: 'blur(8px)'
+              }} />
+              <div style={{
+                position: 'absolute',
+                width: 80, height: 80,
+                borderRadius: '50%',
+                left: `${spotlightPos.x}%`,
+                top: `${spotlightPos.y}%`,
+                transform: 'translate(-50%, -50%)',
+                background: 'radial-gradient(circle, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.2) 40%, transparent 80%)'
+              }} />
+            </>
+          )}
+          {spotlight.style === 'dark_focus' && (
+            <>
+              <div style={{
+                position: 'absolute', inset: 0,
+                background: `radial-gradient(circle at ${spotlightPos.x}% ${spotlightPos.y}%, transparent 15%, rgba(0,0,0,0.7) 50%)` 
+              }} />
+              <div style={{
+                position: 'absolute',
+                width: 96, height: 96,
+                borderRadius: '50%',
+                left: `${spotlightPos.x}%`,
+                top: `${spotlightPos.y}%`,
+                transform: 'translate(-50%, -50%)',
+                border: '2px solid rgba(255,255,255,0.3)',
+                boxShadow: '0 0 20px rgba(255,255,255,0.2)'
+              }} />
+            </>
+          )}
+          {spotlight.style === 'ring_glow' && (
+            <>
+              <div style={{
+                position: 'absolute',
+                width: 64, height: 64,
+                borderRadius: '50%',
+                left: `${spotlightPos.x}%`,
+                top: `${spotlightPos.y}%`,
+                transform: 'translate(-50%, -50%)',
+                border: '3px solid rgba(139,92,246,0.8)',
+                boxShadow: '0 0 30px rgba(139,92,246,0.6), inset 0 0 20px rgba(139,92,246,0.3)'
+              }} />
+              <div style={{
+                position: 'absolute',
+                width: 96, height: 96,
+                borderRadius: '50%',
+                left: `${spotlightPos.x}%`,
+                top: `${spotlightPos.y}%`,
+                transform: 'translate(-50%, -50%)',
+                border: '1px solid rgba(139,92,246,0.4)',
+                boxShadow: '0 0 40px rgba(139,92,246,0.3)'
+              }} />
+            </>
+          )}
+          {spotlight.label && (
+            <div style={{
+              position: 'absolute',
+              background: 'rgba(139,92,246,0.9)',
+              color: 'white',
+              fontSize: 12,
+              padding: '2px 8px',
+              borderRadius: 999,
+              left: `${spotlightPos.x}%`,
+              top: `${spotlightPos.y + 8}%`,
+              transform: 'translateX(-50%)'
+            }}>
+              {spotlight.label}
+            </div>
+          )}
+        </div>
+      )
+    })()}
+  </div>
                         ) : (
                           <HighlightVideoPreview
                             localPreviewUrl={composer.localPreviewUrl}
@@ -1418,36 +1556,63 @@ export function CreatePostComposer({ userId }: CreatePostComposerProps) {
                         </p>
                       )}
 
-                      {aiSuggestion && (
-                        <div style={{
-                          background: 'rgba(124,58,237,0.15)',
-                          border: '1px solid rgba(124,58,237,0.4)',
-                          borderRadius: '12px',
-                          padding: '16px',
-                          marginBottom: '16px'
-                        }}>
-                          <p style={{ color: '#A78BFA', fontWeight: 700, marginBottom: 4 }}>
-                            ✨ AI found your best moment
-                          </p>
-                          <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: 14 }}>
-                            {aiSuggestion.description}
-                          </p>
-                          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, marginTop: 4 }}>
-                            At {aiSuggestion.startTime.toFixed(1)}s — {aiSuggestion.endTime.toFixed(1)}s
-                          </p>
-                          <button
-                            onClick={() => {
-                              // Set spotlight to AI suggested time
-                              // Update composer spotlight start/end times
-                              setComposer(prev => ({
-                                ...prev,
-                                highlight: {
-                                  ...prev.highlight,
-                                  spotlightStart: aiSuggestion.startTime,
-                                  spotlightEnd: aiSuggestion.endTime
-                                }
-                              }))
-                            }}
+                      {aiApplied ? (
+  <div style={{
+    background: 'rgba(16,185,129,0.15)',
+    border: '1px solid rgba(16,185,129,0.4)',
+    borderRadius: '12px',
+    padding: '12px 16px',
+    color: '#10B981',
+    fontWeight: 600,
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: '16px'
+  }}>
+    ✅ Spotlight applied at {aiSuggestion?.startTime.toFixed(1)}s
+    — scroll down to see Spotlight tab
+  </div>
+) : aiSuggestion ? (
+  <div style={{
+    background: 'rgba(124,58,237,0.15)',
+    border: '1px solid rgba(124,58,237,0.4)',
+    borderRadius: '12px',
+    padding: '16px',
+    marginBottom: '16px'
+  }}>
+    <p style={{ color: '#A78BFA', fontWeight: 700, marginBottom: 4 }}>
+      ✨ AI found your best moment
+    </p>
+    <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: 14 }}>
+      {aiSuggestion.description}
+    </p>
+    <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, marginTop: 4 }}>
+      At {aiSuggestion.startTime.toFixed(1)}s — {aiSuggestion.endTime.toFixed(1)}s
+    </p>
+    <button
+      onClick={() => {
+  if (!aiSuggestion) return
+  const s = composer.highlight.spotlight
+  updateHighlight({
+    spotlight: {
+      enabled: true,
+      style: s?.style || 'soft_white',
+      startTime: aiSuggestion.startTime,
+      durationSeconds: Math.min(
+        Math.round(aiSuggestion.endTime - aiSuggestion.startTime),
+        3
+      ) as 1 | 2 | 3 || 2,
+      keyframes: s?.keyframes || [
+        { id: 'start', progress: 0, x: 50, y: 50 },
+        { id: 'mid', progress: 0.5, x: 50, y: 50 },
+        { id: 'end', progress: 1, x: 50, y: 50 }
+      ],
+      label: s?.label
+    }
+  })
+  // Switch to spotlight tab so user can see it applied
+  updateEditTab('spotlight')
+  setAiApplied(true)
+}}
                             style={{
                               marginTop: '12px',
                               padding: '8px 16px',
@@ -1464,7 +1629,7 @@ export function CreatePostComposer({ userId }: CreatePostComposerProps) {
                             Apply AI Spotlight →
                           </button>
                         </div>
-                      )}
+) : null}
 
                       {/* Edit Button */}
                       <button 
@@ -1507,20 +1672,75 @@ export function CreatePostComposer({ userId }: CreatePostComposerProps) {
 
                       {/* Video Preview */}
                       <div className="mb-6">
-                        <HighlightVideoPreview
-                          localPreviewUrl={composer.localPreviewUrl}
-                          videoRef={videoRef}
-                          spotlight={composer.highlight.spotlight}
-                          currentTime={composer.highlight.currentTime || 0}
-                          placingKeyframe={undefined}
-                          showControls={true}
-                          enableSpotlightPlacement={false}
-                          onLoadedMetadata={() => {}}
-                          onDurationChange={() => {}}
-                          onTimeUpdate={() => {}}
-                          onSeeked={() => {}}
-                          onVideoAreaClick={() => {}}
-                        />
+                        {composer.highlight.muxPlaybackId ? (
+                          <div style={{
+                            width: '100%',
+                            height: '160px',
+                            borderRadius: '12px',
+                            overflow: 'hidden',
+                            position: 'relative'
+                          }}>
+                            <img
+                              src={composer.highlight.coverFrameUrl || 
+                                `https://image.mux.com/${composer.highlight.muxPlaybackId}/thumbnail.jpg`}
+                              style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'cover'
+                              }}
+                              alt="Video thumbnail"
+                            />
+                            <div style={{
+                              position: 'absolute',
+                              inset: 0,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              background: 'rgba(0,0,0,0.3)'
+                            }}>
+                              <div style={{
+                                width: 48,
+                                height: 48,
+                                borderRadius: '50%',
+                                background: 'rgba(255,255,255,0.2)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: 20
+                              }}>▶</div>
+                            </div>
+                            {composer.highlight.spotlight?.enabled && (
+                              <div style={{
+                                position: 'absolute',
+                                bottom: 8,
+                                left: 8,
+                                background: 'rgba(124,58,237,0.9)',
+                                color: 'white',
+                                fontSize: 11,
+                                padding: '2px 8px',
+                                borderRadius: 999,
+                                fontWeight: 600
+                              }}>
+                                ✨ Spotlight at {composer.highlight.spotlight.startTime.toFixed(1)}s
+                              </div>
+                            )}
+                          </div>
+                        ) : composer.localPreviewUrl ? (
+                          <HighlightVideoPreview
+                            localPreviewUrl={composer.localPreviewUrl}
+                            videoRef={videoRef}
+                            spotlight={composer.highlight.spotlight}
+                            currentTime={composer.highlight.currentTime || 0}
+                            placingKeyframe={undefined}
+                            showControls={true}
+                            enableSpotlightPlacement={false}
+                            onLoadedMetadata={() => {}}
+                            onDurationChange={() => {}}
+                            onTimeUpdate={() => {}}
+                            onSeeked={() => {}}
+                            onVideoAreaClick={() => {}}
+                          />
+                        ) : null}
                       </div>
 
                       {/* Metadata Form */}
@@ -2009,6 +2229,20 @@ export function CreatePostComposer({ userId }: CreatePostComposerProps) {
                   <h3 style={{ ...styles.displayHeader, fontSize: "18px", color: colors.white }}>
                     Spotlight Effect
                   </h3>
+                  {composer.highlight.spotlight?.enabled && (
+                    <div style={{
+                      background: 'rgba(124,58,237,0.15)',
+                      border: '1px solid rgba(124,58,237,0.3)',
+                      borderRadius: '8px',
+                      padding: '10px 14px',
+                      marginBottom: '12px',
+                      color: '#A78BFA',
+                      fontSize: 13
+                    }}>
+                      ✨ Spotlight set at {composer.highlight.spotlight.startTime.toFixed(1)}s 
+                      for {composer.highlight.spotlight.durationSeconds}s
+                    </div>
+                  )}
                   <div className="space-y-4">
                     {!composer.highlight.spotlight ? (
                       <div>

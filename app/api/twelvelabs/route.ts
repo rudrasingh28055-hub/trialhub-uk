@@ -2,54 +2,58 @@ import { NextResponse } from 'next/server'
 
 const TWELVELABS_API_KEY = process.env.TWELVELABS_API_KEY
 const TWELVELABS_INDEX_ID = process.env.TWELVELABS_INDEX_ID
-const BASE_URL = 'https://api.twelvelabs.io/v1.2'
+const BASE_URL = 'https://api.twelvelabs.io/v1.3'
 
 export async function POST(request: Request) {
   const { action, videoUrl, videoId } = await request.json()
 
+  console.log('Twelve Labs API call:', { action, hasVideoUrl: !!videoUrl, hasVideoId: !!videoId })
+
   if (!TWELVELABS_API_KEY || !TWELVELABS_INDEX_ID) {
+    console.error('Missing Twelve Labs credentials:', {
+      hasApiKey: !!TWELVELABS_API_KEY,
+      hasIndexId: !!TWELVELABS_INDEX_ID,
+      apiKeyLength: TWELVELABS_API_KEY?.length,
+      indexIdLength: TWELVELABS_INDEX_ID?.length
+    })
     return NextResponse.json({ error: 'Twelve Labs not configured' })
   }
 
+  console.log('Twelve Labs credentials validated:', {
+    apiKeyPrefix: TWELVELABS_API_KEY?.substring(0, 8) + '...',
+    indexId: TWELVELABS_INDEX_ID
+  })
+
   // ACTION 1: Upload video for indexing
   if (action === 'index') {
-    try {
-      const res = await fetch(`${BASE_URL}/tasks`, {
-        method: 'POST',
-        headers: {
-          'x-api-key': TWELVELABS_API_KEY,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          index_id: TWELVELABS_INDEX_ID,
-          url: videoUrl,
-          language: 'en'
-        })
+    console.log('Attempting to index URL:', videoUrl)
+    
+    const formData = new FormData()
+    formData.append('index_id', TWELVELABS_INDEX_ID!)
+    formData.append('video_url', videoUrl)
+    formData.append('language', 'en')
+
+    const res = await fetch(`${BASE_URL}/tasks`, {
+      method: 'POST',
+      headers: {
+        'x-api-key': TWELVELABS_API_KEY!
+      },
+      body: formData
+    })
+
+    const responseText = await res.text()
+    console.log('Twelve Labs response status:', res.status)
+    console.log('Twelve Labs response body:', responseText)
+
+    if (!res.ok) {
+      return NextResponse.json({ 
+        error: responseText,
+        status: res.status
       })
-
-      const responseText = await res.text()
-      console.log('Twelve Labs response status:', res.status)
-      console.log('Twelve Labs response body:', responseText)
-
-      let data
-      try {
-        data = JSON.parse(responseText)
-      } catch (e) {
-        return NextResponse.json({ error: 'Invalid response from Twelve Labs' })
-      }
-
-      if (!res.ok) {
-        return NextResponse.json({ 
-          error: data.message || data.error || 'Twelve Labs API error',
-          status: res.status
-        })
-      }
-
-      return NextResponse.json({ taskId: data._id })
-    } catch (error) {
-      console.error('Index error:', error)
-      return NextResponse.json({ error: 'Failed to index video' })
     }
+
+    const data = JSON.parse(responseText)
+    return NextResponse.json({ taskId: data._id })
   }
 
   // ACTION 2: Search for best football moment

@@ -30,7 +30,7 @@ export async function POST(request: Request) {
           new_asset_settings: {
             playback_policy: ['public'],
             encoding_tier: 'baseline',
-            mp4_support: 'none'
+            mp4_support: 'capped-1080p'
           },
           cors_origin: '*'
         })
