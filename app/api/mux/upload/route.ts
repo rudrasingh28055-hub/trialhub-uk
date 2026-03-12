@@ -1,59 +1,86 @@
 import Mux from '@mux/mux-node'
 import { NextResponse } from 'next/server'
 
-const mux = new Mux({
-  tokenId: process.env.MUX_TOKEN_ID!,
-  tokenSecret: process.env.MUX_TOKEN_SECRET!
-})
-
 export async function POST(request: Request) {
   try {
-    const { action, uploadId, assetId } = await request.json()
-
-    // ACTION: Create a direct upload URL
-    if (action === 'create-upload') {
-      const upload = await mux.video.uploads.create({
-        new_asset_settings: {
-          playback_policy: ['public'],
-          encoding_tier: 'baseline',
-          mp4_support: 'standard'
-        },
-        cors_origin: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-      })
-      
-      return NextResponse.json({
-        uploadId: upload.id,
-        uploadUrl: upload.url
+    const tokenId = process.env.MUX_TOKEN_ID
+    const tokenSecret = process.env.MUX_TOKEN_SECRET
+    
+    console.log('MUX_TOKEN_ID exists:', !!tokenId)
+    console.log('MUX_TOKEN_SECRET exists:', !!tokenSecret)
+    console.log('MUX_TOKEN_ID prefix:', tokenId?.slice(0, 8))
+    
+    if (!tokenId || !tokenSecret) {
+      return NextResponse.json({ 
+        error: 'Missing MUX_TOKEN_ID or MUX_TOKEN_SECRET in .env.local' 
       })
     }
 
-    // ACTION: Check upload status and get playback ID
-    if (action === 'check-status' && uploadId) {
-      const upload = await mux.video.uploads.retrieve(uploadId)
-      
-      if (upload.asset_id) {
-        const asset = await mux.video.assets.retrieve(upload.asset_id)
-        const playbackId = asset.playback_ids?.[0]?.id
+    const mux = new Mux({
+      tokenId,
+      tokenSecret
+    })
+
+    const { action, uploadId } = await request.json()
+    console.log('Mux action:', action)
+
+    if (action === 'create-upload') {
+      try {
+        const upload = await mux.video.uploads.create({
+          new_asset_settings: {
+            playback_policy: ['public'],
+            encoding_tier: 'baseline',
+            mp4_support: 'none'
+          },
+          cors_origin: '*'
+        })
         
+        console.log('Mux upload created:', upload.id)
         return NextResponse.json({
-          status: asset.status,
-          assetId: asset.id,
-          playbackId: playbackId,
-          playbackUrl: playbackId 
-            ? `https://stream.mux.com/${playbackId}.m3u8` 
-            : null,
-          thumbnailUrl: playbackId
-            ? `https://image.mux.com/${playbackId}/thumbnail.jpg` 
-            : null
+          uploadId: upload.id,
+          uploadUrl: upload.url
+        })
+      } catch (muxError: any) {
+        console.error('Mux create upload error:', muxError?.message || muxError)
+        console.error('Mux error details:', JSON.stringify(muxError))
+        return NextResponse.json({ 
+          error: muxError?.message || 'Failed to create Mux upload' 
         })
       }
-      
-      return NextResponse.json({ status: upload.status })
+    }
+
+    if (action === 'check-status' && uploadId) {
+      try {
+        const upload = await mux.video.uploads.retrieve(uploadId)
+        console.log('Upload status:', upload.status, 'Asset ID:', upload.asset_id)
+        
+        if (upload.asset_id) {
+          const asset = await mux.video.assets.retrieve(upload.asset_id)
+          const playbackId = asset.playback_ids?.[0]?.id
+          console.log('Asset status:', asset.status, 'Playback ID:', playbackId)
+          
+          return NextResponse.json({
+            status: asset.status,
+            assetId: asset.id,
+            playbackId,
+            playbackUrl: playbackId 
+              ? `https://stream.mux.com/${playbackId}.m3u8` 
+              : null,
+            thumbnailUrl: playbackId
+              ? `https://image.mux.com/${playbackId}/thumbnail.jpg` 
+              : null
+          })
+        }
+        return NextResponse.json({ status: upload.status })
+      } catch (muxError: any) {
+        console.error('Mux status check error:', muxError?.message)
+        return NextResponse.json({ error: muxError?.message })
+      }
     }
 
     return NextResponse.json({ error: 'Invalid action' })
-  } catch (error) {
-    console.error('Mux error:', error)
-    return NextResponse.json({ error: 'Mux operation failed' })
+  } catch (error: any) {
+    console.error('Mux route error:', error?.message || error)
+    return NextResponse.json({ error: error?.message || 'Mux operation failed' })
   }
 }

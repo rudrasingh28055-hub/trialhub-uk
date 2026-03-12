@@ -15,11 +15,13 @@ export default function MuxVideoUploader({ onUploadComplete, onProgress }: Props
   const [uploading, setUploading] = useState(false)
   const [progress, setProgress] = useState(0)
   const [status, setStatus] = useState('')
+  const [error, setError] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
 
   const handleFileSelect = async (file: File) => {
     if (!file) return
     setUploading(true)
+    setError('')
     setStatus('Preparing upload...')
 
     try {
@@ -32,7 +34,8 @@ export default function MuxVideoUploader({ onUploadComplete, onProgress }: Props
       const { uploadId, uploadUrl, error } = await res.json()
       
       if (error || !uploadUrl) {
-        console.error('Failed to get upload URL:', error)
+        console.warn('Failed to get upload URL:', error)
+        setError(error || 'Failed to prepare upload. Please try again.')
         setUploading(false)
         return
       }
@@ -88,9 +91,9 @@ export default function MuxVideoUploader({ onUploadComplete, onProgress }: Props
       } else {
         setStatus('Processing taking longer than expected...')
       }
-    } catch (error) {
-      console.error('Upload error:', error)
-      setStatus('Upload failed. Please try again.')
+    } catch (err) {
+      console.error('Upload error:', err)
+      setError(err instanceof Error ? err.message : 'Upload failed. Please try again.')
     }
     
     setUploading(false)
@@ -108,10 +111,24 @@ export default function MuxVideoUploader({ onUploadComplete, onProgress }: Props
           if (file) handleFileSelect(file)
         }}
       />
-      
+
+      {error && (
+        <div style={{
+          marginBottom: 12,
+          padding: '10px 14px',
+          background: 'rgba(239,68,68,0.1)',
+          border: '1px solid rgba(239,68,68,0.3)',
+          borderRadius: 10,
+          color: '#f87171',
+          fontSize: 13
+        }}>
+          {error}
+        </div>
+      )}
+
       {!uploading ? (
         <button
-          onClick={() => fileRef.current?.click()}
+          onClick={() => { setError(''); fileRef.current?.click() }}
           style={{
             width: '100%',
             padding: '48px 24px',
