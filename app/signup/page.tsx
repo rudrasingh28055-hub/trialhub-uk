@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "../../lib/supabase/client";
+import { createClient } from "@/lib/supabase/client";
+import { colors, typography, styles, borderRadius } from "@/lib/design/tokens";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -71,14 +72,33 @@ export default function SignupPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-950 px-6 py-16 text-white">
+    <main className="min-h-screen px-6 py-16" style={{ backgroundColor: colors.black }}>
       <div className="mx-auto max-w-md">
-        <div className="rounded-3xl border border-white/10 bg-white/5 p-8">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-300">
-            AthLink
+        <div style={{ ...styles.sheetBorder, backgroundColor: colors.card, border: `1px solid ${colors.surface}`, padding: "32px" }}>
+          <p 
+            className="text-sm font-semibold uppercase tracking-[0.2em]"
+            style={{ 
+              fontFamily: typography.display,
+              ...styles.displayHeader,
+              color: colors.accent
+            }}
+          >
+            Debut
           </p>
-          <h1 className="mt-3 text-3xl font-bold">Create account</h1>
-          <p className="mt-2 text-sm text-slate-400">
+          <h1 
+            className="mt-3 text-3xl font-bold"
+            style={{ 
+              fontFamily: typography.display,
+              ...styles.displayHeader,
+              color: colors.white
+            }}
+          >
+            Create account
+          </h1>
+          <p 
+            className="mt-2 text-sm"
+            style={{ color: colors.muted }}
+          >
             Start as an athlete or a club.
           </p>
 
@@ -88,7 +108,15 @@ export default function SignupPage() {
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none placeholder:text-slate-500"
+              className="w-full px-4 py-3 text-sm outline-none transition-all"
+              style={{ 
+                ...styles.buttonBorder,
+                backgroundColor: colors.input, 
+                border: `1px solid ${colors.surface}`, 
+                color: colors.white,
+                fontFamily: typography.body
+              }}
+              placeholderStyle={{ color: colors.muted }}
               required
             />
 
@@ -97,28 +125,47 @@ export default function SignupPage() {
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none placeholder:text-slate-500"
+              className="w-full px-4 py-3 text-sm outline-none transition-all"
+              style={{ 
+                ...styles.buttonBorder,
+                backgroundColor: colors.input, 
+                border: `1px solid ${colors.surface}`, 
+                color: colors.white,
+                fontFamily: typography.body
+              }}
+              placeholderStyle={{ color: colors.muted }}
               required
             />
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-2xl bg-blue-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-400 disabled:opacity-60"
+              className="w-full px-4 py-3 text-sm font-semibold transition-all disabled:opacity-60"
+              style={{ 
+                ...styles.buttonBorder,
+                backgroundColor: colors.accent, 
+                color: colors.white,
+                fontFamily: typography.display,
+                ...styles.displayHeader
+              }}
             >
-              {loading ? "Creating account..." : "Create account"}
+              {loading ? "CREATING ACCOUNT..." : "CREATE ACCOUNT"}
             </button>
           </form>
 
           {message && (
-            <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-200">
+            <div className="mt-4 p-4 text-sm" style={{ ...styles.sheetBorder, backgroundColor: `${colors.success}10`, border: `1px solid ${colors.success}30`, color: colors.success }}>
               {message}
             </div>
           )}
 
-          <p className="mt-6 text-sm text-slate-400">
+          <p className="mt-6 text-sm" style={{ color: colors.muted }}>
             Already have an account?{" "}
-            <Link href="/login" className="font-medium text-white underline">
+            <Link 
+              href="/login" 
+              className="font-medium underline"
+              style={{ color: colors.white }}
+            >
               Login
             </Link>
           </p>

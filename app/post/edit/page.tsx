@@ -1,7 +1,7 @@
-import { createClient } from "../../../lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import PageHeader from "../../../components/layout/PageHeader";
-import { CreatePostComposer } from "../../../components/CreatePostComposer";
+import PageHeader from "@/components/layout/PageHeader";
+import { CreatePostComposer } from "@/components/CreatePostComposer";
 
 export default async function EditPostPage() {
   const supabase = await createClient();

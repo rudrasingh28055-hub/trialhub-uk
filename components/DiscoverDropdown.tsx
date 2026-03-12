@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { colors, typography, styles, borderRadius } from "../lib/design/tokens";
 
 type Role = "athlete" | "club" | null;
 
@@ -37,14 +38,25 @@ export function DiscoverDropdown({ role, className = "" }: DiscoverDropdownProps
       <button
         onClick={() => setIsOpen(!isOpen)}
         onMouseEnter={() => setIsOpen(true)}
-        className={`rounded-2xl px-4 py-2 text-sm font-medium transition-all ${
-          isOpen
-            ? "bg-sky-500/20 text-sky-300 border border-sky-500/30"
-            : "text-slate-300 hover:bg-white/10 hover:text-white"
-        }`}
+        className="px-4 py-2 text-sm font-medium transition-all"
+        style={{
+          ...styles.pillBorder,
+          backgroundColor: isOpen ? `${colors.accent}10` : "transparent",
+          border: isOpen ? `1px solid ${colors.accent}40` : `1px solid ${colors.surface}`,
+          color: isOpen ? colors.accent : colors.white
+        }}
       >
         <span className="flex items-center gap-2">
-          Discover
+          <span
+            style={{ 
+              fontFamily: typography.display,
+              fontWeight: "bold",
+              textTransform: "uppercase",
+              letterSpacing: "0.05em"
+            }}
+          >
+            Discover
+          </span>
           <svg 
             className={`h-4 w-4 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} 
             fill="none" 
@@ -58,18 +70,43 @@ export function DiscoverDropdown({ role, className = "" }: DiscoverDropdownProps
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 w-80 rounded-2xl border border-white/10 bg-gradient-to-br from-slate-950/95 to-slate-900/95 backdrop-blur-xl shadow-2xl z-50">
-          <div className="p-2">
+        <div 
+          className="absolute top-full left-0 mt-2 w-80 z-50"
+          style={{ 
+            ...styles.sheetBorder,
+            backgroundColor: colors.card, 
+            border: `1px solid ${colors.surface}`
+          }}
+        >
+          <div style={{ padding: "8px" }}>
             {discoverItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="block rounded-xl p-4 transition-all duration-200 hover:bg-white/10 group"
+                className="block p-4 rounded-xl transition-all duration-200 group"
+                style={{ 
+                  ...styles.buttonBorder,
+                  backgroundColor: "transparent",
+                  border: "1px solid transparent"
+                }}
                 onClick={() => setIsOpen(false)}
               >
                 <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500/20 to-blue-500/20 border border-sky-500/30 group-hover:from-sky-500/30 group-hover:to-blue-500/30 transition-colors">
-                    <svg className="h-5 w-5 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div 
+                    className="flex h-10 w-10 items-center justify-center rounded-xl transition-colors"
+                    style={{ 
+                      ...styles.buttonBorder,
+                      backgroundColor: `${colors.accent}10`, 
+                      border: `1px solid ${colors.accent}30`
+                    }}
+                  >
+                    <svg 
+                      className="h-5 w-5" 
+                      style={{ color: colors.accent }} 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
                       {item.href === "/players" && (
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                       )}
@@ -82,10 +119,20 @@ export function DiscoverDropdown({ role, className = "" }: DiscoverDropdownProps
                     </svg>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-semibold text-white group-hover:text-sky-300 transition-colors">
+                    <div 
+                      className="text-sm font-semibold transition-colors"
+                      style={{ 
+                        fontFamily: typography.display,
+                        ...styles.displayHeader,
+                        color: colors.white
+                      }}
+                    >
                       {item.label}
                     </div>
-                    <div className="text-xs text-slate-400 mt-1">
+                    <div 
+                      className="text-xs mt-1"
+                      style={{ color: colors.muted }}
+                    >
                       {item.description}
                     </div>
                   </div>

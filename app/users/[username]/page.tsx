@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, use } from "react";
-import Navbar from "../../../components/Navbar";
+import Navbar from "@/components/Navbar";
 import { FollowButton } from "../../../components/domain/social-graph/FollowButton";
 import { FollowRequestsList } from "../../../components/domain/social-graph/FollowRequestsList";
 import { createClient } from "../../../lib/supabase/client";

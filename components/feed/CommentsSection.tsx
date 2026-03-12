@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getPostComments, addComment } from "../../lib/feed/actions";
 import type { PostComment } from "../../lib/feed/types";
+import { colors, typography, styles, borderRadius } from "../../lib/design/tokens";
 
 interface CommentsSectionProps {
   postId: string;
@@ -77,17 +78,28 @@ export function CommentsSection({ postId, currentUserId, isOpen, onClose, commen
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: "auto" }}
           exit={{ opacity: 0, height: 0 }}
-          className="border-t border-white/10 bg-white/5"
+          style={{ 
+            borderTop: `1px solid ${colors.surface}`,
+            backgroundColor: colors.card
+          }}
         >
-          <div className="p-4 space-y-4">
+          <div style={{ padding: "16px" }} className="space-y-4">
             {/* Header */}
             <div className="flex items-center justify-between">
-              <h4 className="text-sm font-semibold text-white">
+              <h4 
+                className="text-sm font-semibold"
+                style={{ 
+                  fontFamily: typography.display,
+                  ...styles.displayHeader,
+                  color: colors.white
+                }}
+              >
                 Comments ({comments.length})
               </h4>
               <button
                 onClick={onClose}
-                className="text-slate-400 hover:text-white transition-colors"
+                className="transition-colors"
+                style={{ color: colors.muted }}
               >
                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -97,40 +109,79 @@ export function CommentsSection({ postId, currentUserId, isOpen, onClose, commen
 
             {/* Error */}
             {error && (
-              <div className="rounded-lg bg-red-500/10 border border-red-500/20 p-2 text-xs text-red-400">
+              <div 
+                className="p-2 text-xs"
+                style={{ 
+                  ...styles.sheetBorder,
+                  backgroundColor: `${colors.danger}10`, 
+                  border: `1px solid ${colors.danger}30`,
+                  color: colors.danger
+                }}
+              >
                 {error}
               </div>
             )}
 
             {/* Comments List */}
-            <div className="space-y-3 max-h-60 overflow-y-auto">
+            <div className="space-y-3" style={{ maxHeight: "240px", overflowY: "auto" }}>
               {isLoading ? (
                 <div className="text-center py-4">
-                  <svg className="animate-spin h-5 w-5 text-slate-400 mx-auto" viewBox="0 0 24 24">
+                  <svg 
+                    className="animate-spin h-5 w-5 mx-auto" 
+                    style={{ color: colors.muted }} 
+                    viewBox="0 0 24 24"
+                  >
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                   </svg>
                 </div>
               ) : comments.length === 0 ? (
-                <p className="text-sm text-slate-500 text-center py-4">
+                <p 
+                  className="text-sm text-center py-4"
+                  style={{ color: colors.muted }}
+                >
                   No comments yet. Be the first to comment!
                 </p>
               ) : (
                 comments.map((comment) => (
                   <div key={comment.id} className="flex gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-indigo-500 text-xs font-bold text-white flex-shrink-0">
+                    <div 
+                      className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold text-white flex-shrink-0"
+                      style={{ 
+                        ...styles.pillBorder,
+                        backgroundColor: colors.accent
+                      }}
+                    >
                       {comment.author?.full_name?.charAt(0) || "?"}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="font-medium text-white text-sm">
+                        <span 
+                          className="font-medium text-sm"
+                          style={{ 
+                            fontFamily: typography.display,
+                            ...styles.displayHeader,
+                            color: colors.white
+                          }}
+                        >
                           {comment.author?.full_name || "Unknown"}
                         </span>
-                        <span className="text-xs text-slate-500">
+                        <span 
+                          className="text-xs"
+                          style={{ color: colors.muted }}
+                        >
                           {new Date(comment.created_at).toLocaleDateString()}
                         </span>
                       </div>
-                      <p className="text-sm text-slate-300">{comment.content}</p>
+                      <p 
+                        className="text-sm"
+                        style={{ 
+                          fontFamily: typography.body,
+                          color: colors.white
+                        }}
+                      >
+                        {comment.content}
+                      </p>
                     </div>
                   </div>
                 ))
@@ -145,19 +196,38 @@ export function CommentsSection({ postId, currentUserId, isOpen, onClose, commen
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
                   placeholder="Add a comment..."
-                  className="flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-sky-400 focus:outline-none"
+                  className="flex-1 px-3 py-2 text-sm outline-none transition-all"
+                  style={{ 
+                    ...styles.buttonBorder,
+                    backgroundColor: colors.input, 
+                    border: `1px solid ${colors.surface}`, 
+                    color: colors.white,
+                    fontFamily: typography.body
+                  }}
                   disabled={isSubmitting}
                 />
                 <button
                   type="submit"
                   disabled={isSubmitting || !newComment.trim()}
-                  className="rounded-lg bg-sky-500 px-4 py-2 text-sm font-medium text-white hover:bg-sky-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ 
+                    ...styles.buttonBorder,
+                    backgroundColor: colors.accent, 
+                    color: colors.white,
+                    fontFamily: typography.display,
+                    fontWeight: "bold",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.05em"
+                  }}
                 >
-                  {isSubmitting ? "..." : "Post"}
+                  {isSubmitting ? "..." : "POST"}
                 </button>
               </form>
             ) : (
-              <p className="text-sm text-slate-500 text-center">
+              <p 
+                className="text-sm text-center"
+                style={{ color: colors.muted }}
+              >
                 Log in to add a comment
               </p>
             )}

@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { createPost } from "../../lib/feed/actions";
 import type { PostContentType, MediaType } from "../../lib/feed/types";
+import { colors, typography, styles, borderRadius } from "../../lib/design/tokens";
 
 interface CreatePostFormProps {
   onPostCreated?: () => void;
@@ -96,11 +97,32 @@ export function CreatePostForm({ onPostCreated }: CreatePostFormProps) {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         onClick={() => setIsOpen(true)}
-        className="w-full rounded-2xl border border-dashed border-white/20 bg-white/5 p-6 text-center transition-all hover:border-white/40 hover:bg-white/10"
+        className="w-full p-6 text-center transition-all"
+        style={{ 
+          ...styles.sheetBorder,
+          backgroundColor: colors.card, 
+          border: `1px dashed ${colors.surface}`
+        }}
       >
         <div className="text-3xl mb-2">📸</div>
-        <p className="text-white font-medium">Share your moment</p>
-        <p className="text-sm text-slate-400 mt-1">Post highlights, training clips, or achievements</p>
+        <p 
+          className="font-medium"
+          style={{ 
+            color: colors.white,
+            fontFamily: typography.display,
+            fontWeight: "bold",
+            textTransform: "uppercase",
+            letterSpacing: "0.05em"
+          }}
+        >
+          Share your moment
+        </p>
+        <p 
+          className="text-sm mt-1"
+          style={{ color: colors.muted }}
+        >
+          Post highlights, training clips, or achievements
+        </p>
       </motion.button>
     );
   }
@@ -109,13 +131,30 @@ export function CreatePostForm({ onPostCreated }: CreatePostFormProps) {
     <motion.div
       initial={{ opacity: 0, height: 0 }}
       animate={{ opacity: 1, height: "auto" }}
-      className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 to-white/5 p-6"
+      style={{ 
+        ...styles.sheetBorder,
+        backgroundColor: colors.card, 
+        border: `1px solid ${colors.surface}`,
+        padding: "24px"
+      }}
     >
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-white">Create Post</h3>
+        <h3 
+          className="text-lg font-semibold"
+          style={{ 
+            color: colors.white,
+            fontFamily: typography.display,
+            fontWeight: "bold",
+            textTransform: "uppercase",
+            letterSpacing: "0.05em"
+          }}
+        >
+          Create Post
+        </h3>
         <button
           onClick={() => setIsOpen(false)}
-          className="text-slate-400 hover:text-white transition-colors"
+          className="transition-colors"
+          style={{ color: colors.muted }}
         >
           <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -131,11 +170,13 @@ export function CreatePostForm({ onPostCreated }: CreatePostFormProps) {
               key={type.value}
               type="button"
               onClick={() => setContentType(type.value)}
-              className={`rounded-xl border p-3 text-center transition-all ${
-                contentType === type.value
-                  ? "border-sky-400 bg-sky-500/20 text-sky-300"
-                  : "border-white/10 bg-white/5 text-slate-400 hover:border-white/20 hover:text-slate-300"
-              }`}
+              className="rounded-xl border p-3 text-center transition-all"
+              style={{
+                ...styles.buttonBorder,
+                backgroundColor: contentType === type.value ? `${colors.accent}10` : colors.surface,
+                border: contentType === type.value ? `1px solid ${colors.accent}40` : `1px solid ${colors.input}`,
+                color: contentType === type.value ? colors.accent : colors.muted
+              }}
             >
               <div className="text-xl mb-1">{type.icon}</div>
               <span className="text-xs">{type.label}</span>
@@ -145,7 +186,10 @@ export function CreatePostForm({ onPostCreated }: CreatePostFormProps) {
 
         {/* Media URL */}
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-2">
+          <label 
+            className="block text-sm font-medium mb-2"
+            style={{ color: colors.white }}
+          >
             Media URL (Video or Image)
           </label>
           <input
@@ -153,25 +197,32 @@ export function CreatePostForm({ onPostCreated }: CreatePostFormProps) {
             value={mediaUrl}
             onChange={(e) => setMediaUrl(e.target.value)}
             placeholder="https://..."
-            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-sky-400 focus:outline-none"
+            className="w-full px-4 py-3 text-sm outline-none transition-all"
+            style={{ 
+              ...styles.buttonBorder,
+              backgroundColor: colors.input, 
+              border: `1px solid ${colors.surface}`, 
+              color: colors.white,
+              fontFamily: typography.body
+            }}
             required
           />
           <div className="flex gap-4 mt-2">
-            <label className="flex items-center gap-2 text-sm text-slate-400">
+            <label className="flex items-center gap-2 text-sm" style={{ color: colors.muted }}>
               <input
                 type="radio"
                 checked={mediaType === "video"}
                 onChange={() => setMediaType("video")}
-                className="accent-sky-500"
+                style={{ accentColor: colors.accent }}
               />
               Video
             </label>
-            <label className="flex items-center gap-2 text-sm text-slate-400">
+            <label className="flex items-center gap-2 text-sm" style={{ color: colors.muted }}>
               <input
                 type="radio"
                 checked={mediaType === "image"}
                 onChange={() => setMediaType("image")}
-                className="accent-sky-500"
+                style={{ accentColor: colors.accent }}
               />
               Image
             </label>
@@ -180,7 +231,10 @@ export function CreatePostForm({ onPostCreated }: CreatePostFormProps) {
 
         {/* Caption */}
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-2">
+          <label 
+            className="block text-sm font-medium mb-2"
+            style={{ color: colors.white }}
+          >
             Caption
           </label>
           <textarea
@@ -188,20 +242,37 @@ export function CreatePostForm({ onPostCreated }: CreatePostFormProps) {
             onChange={(e) => setCaption(e.target.value)}
             placeholder="Describe your moment..."
             rows={3}
-            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-sky-400 focus:outline-none resize-none"
+            className="w-full px-4 py-3 text-sm outline-none transition-all resize-none"
+            style={{ 
+              ...styles.buttonBorder,
+              backgroundColor: colors.input, 
+              border: `1px solid ${colors.surface}`, 
+              color: colors.white,
+              fontFamily: typography.body
+            }}
           />
         </div>
 
         {/* Tags */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-2">
+            <label 
+              className="block text-xs font-medium mb-2"
+              style={{ color: colors.white }}
+            >
               Position
             </label>
             <select
               value={positionTag}
               onChange={(e) => setPositionTag(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:border-sky-400 focus:outline-none"
+              className="w-full px-3 py-2 text-sm outline-none transition-all"
+              style={{ 
+                ...styles.buttonBorder,
+                backgroundColor: colors.input, 
+                border: `1px solid ${colors.surface}`, 
+                color: colors.white,
+                fontFamily: typography.body
+              }}
             >
               <option value="">Select position</option>
               {positions.map((pos) => (
@@ -211,7 +282,10 @@ export function CreatePostForm({ onPostCreated }: CreatePostFormProps) {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-2">
+            <label 
+              className="block text-xs font-medium mb-2"
+              style={{ color: colors.white }}
+            >
               Club
             </label>
             <input
@@ -219,12 +293,22 @@ export function CreatePostForm({ onPostCreated }: CreatePostFormProps) {
               value={clubHistoryTag}
               onChange={(e) => setClubHistoryTag(e.target.value)}
               placeholder="Current/previous club"
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-sky-400 focus:outline-none"
+              className="w-full px-3 py-2 text-sm outline-none transition-all"
+              style={{ 
+                ...styles.buttonBorder,
+                backgroundColor: colors.input, 
+                border: `1px solid ${colors.surface}`, 
+                color: colors.white,
+                fontFamily: typography.body
+              }}
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-2">
+            <label 
+              className="block text-xs font-medium mb-2"
+              style={{ color: colors.white }}
+            >
               Match/Event
             </label>
             <input
@@ -232,12 +316,22 @@ export function CreatePostForm({ onPostCreated }: CreatePostFormProps) {
               value={matchTag}
               onChange={(e) => setMatchTag(e.target.value)}
               placeholder="Match name or event"
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-sky-400 focus:outline-none"
+              className="w-full px-3 py-2 text-sm outline-none transition-all"
+              style={{ 
+                ...styles.buttonBorder,
+                backgroundColor: colors.input, 
+                border: `1px solid ${colors.surface}`, 
+                color: colors.white,
+                fontFamily: typography.body
+              }}
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-2">
+            <label 
+              className="block text-xs font-medium mb-2"
+              style={{ color: colors.white }}
+            >
               Training Type
             </label>
             <input
@@ -245,31 +339,48 @@ export function CreatePostForm({ onPostCreated }: CreatePostFormProps) {
               value={trainingTag}
               onChange={(e) => setTrainingTag(e.target.value)}
               placeholder="e.g., Finishing, Speed"
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-sky-400 focus:outline-none"
+              className="w-full px-3 py-2 text-sm outline-none transition-all"
+              style={{ 
+                ...styles.buttonBorder,
+                backgroundColor: colors.input, 
+                border: `1px solid ${colors.surface}`, 
+                color: colors.white,
+                fontFamily: typography.body
+              }}
             />
           </div>
         </div>
 
         {/* Error */}
         {error && (
-          <div className="rounded-xl bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400">
+          <div className="p-3 text-sm" style={{ ...styles.sheetBorder, backgroundColor: `${colors.danger}10`, border: `1px solid ${colors.danger}30`, color: colors.danger }}>
             {error}
           </div>
         )}
 
         {/* Actions */}
-        <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
+        <div className="flex justify-end gap-3 pt-4" style={{ borderTop: `1px solid ${colors.surface}` }}>
           <button
             type="button"
             onClick={() => setIsOpen(false)}
-            className="rounded-full px-4 py-2 text-sm font-medium text-slate-400 hover:text-white transition-colors"
+            className="px-4 py-2 text-sm font-medium transition-colors"
+            style={{ color: colors.muted }}
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={isLoading}
-            className="rounded-full bg-sky-500 px-6 py-2 text-sm font-semibold text-white hover:bg-sky-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="px-6 py-2 text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            style={{ 
+              ...styles.buttonBorder,
+              backgroundColor: colors.accent, 
+              color: colors.white,
+              fontFamily: typography.display,
+              fontWeight: "bold",
+              textTransform: "uppercase",
+              letterSpacing: "0.05em"
+            }}
           >
             {isLoading ? (
               <>
@@ -277,10 +388,10 @@ export function CreatePostForm({ onPostCreated }: CreatePostFormProps) {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>
-                Posting...
+                POSTING...
               </>
             ) : (
-              "Post"
+              "POST"
             )}
           </button>
         </div>

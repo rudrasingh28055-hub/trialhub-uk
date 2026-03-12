@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { likePost, unlikePost } from "../../lib/feed/actions";
+import { colors, typography, borderRadius, glassPanel, motion as motionConfig } from "../../lib/design/tokens";
 import type { Post } from "../../lib/feed/types";
 import { CommentsSection } from "./CommentsSection";
 import { FeedVideo } from "./FeedVideo";
@@ -14,19 +15,19 @@ interface PostCardProps {
 }
 
 const contentTypeConfig = {
-  highlight: { label: "Highlight", color: "text-violet-400 bg-violet-500/10 border-violet-500/20", icon: "⚡" },
-  training: { label: "Training", color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20", icon: "🏃" },
-  achievement: { label: "Achievement", color: "text-amber-400 bg-amber-500/10 border-amber-500/20", icon: "🏆" },
-  match_moment: { label: "Match Moment", color: "text-sky-400 bg-sky-500/10 border-sky-500/20", icon: "⚽" },
-  general: { label: "Post", color: "text-slate-400 bg-slate-500/10 border-slate-500/20", icon: "📝" },
+  highlight: { label: "Highlight", color: colors.electricViolet, icon: "⚡" },
+  training: { label: "Training", color: colors.success, icon: "🏃" },
+  achievement: { label: "Achievement", color: colors.electricViolet, icon: "🏆" },
+  match_moment: { label: "Match Moment", color: colors.electricViolet, icon: "⚽" },
+  general: { label: "Post", color: colors.muted, icon: "📝" },
 };
 
 const verificationBadges = {
-  0: { label: "Player", color: "text-slate-400" },
-  1: { label: "Verified", color: "text-blue-400" },
-  2: { label: "Academy", color: "text-emerald-400" },
-  3: { label: "Pro", color: "text-amber-400" },
-  4: { label: "Elite", color: "text-violet-400" },
+  0: { label: "Player", color: colors.muted },
+  1: { label: "Verified", color: colors.electricViolet },
+  2: { label: "Academy", color: colors.success },
+  3: { label: "Pro", color: colors.electricViolet },
+  4: { label: "Elite", color: colors.electricViolet },
 };
 
 export function PostCard({ post, currentUserId, onLikeToggle }: PostCardProps) {
@@ -35,6 +36,24 @@ export function PostCard({ post, currentUserId, onLikeToggle }: PostCardProps) {
   const [commentsCount, setCommentsCount] = useState(post.comments_count);
   const [isLoading, setIsLoading] = useState(false);
   const [showComments, setShowComments] = useState(false);
+  const [isInView, setIsInView] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // Intersection Observer for autoplay
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInView(entry.isIntersecting);
+      },
+      { threshold: 0.5 }
+    );
+
+    if (cardRef.current) {
+      observer.observe(cardRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   const contentType = contentTypeConfig[post.content_type];
   const verificationLevel = post.author?.player_profile?.verification_level || 0;
@@ -89,31 +108,46 @@ export function PostCard({ post, currentUserId, onLikeToggle }: PostCardProps) {
 
   return (
     <motion.article
+      ref={cardRef}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm overflow-hidden"
+      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+      className="overflow-hidden"
+      style={{ 
+        ...glassPanel,
+        borderRadius: borderRadius.card
+      }}
     >
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-white/10">
+      <div className="flex items-center justify-between p-4" style={{ borderBottom: `1px solid ${colors.glass.border}` }}>
         <div className="flex items-center gap-3">
           {/* Avatar */}
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-indigo-500 text-sm font-bold text-white">
+          <div 
+            className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold text-white"
+            style={{ backgroundColor: colors.electricViolet }}
+          >
             {post.author?.full_name?.charAt(0) || "?"}
           </div>
           
           {/* Author Info */}
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-white">
+              <span 
+                className="font-semibold text-white"
+                style={{ fontFamily: typography.family, fontWeight: typography.semibold, color: colors.white }}
+              >
                 {post.author?.full_name || "Unknown"}
               </span>
               {verificationLevel > 0 && (
-                <span className={`text-xs ${verificationBadge.color}`}>
+                <span 
+                  className="text-xs"
+                  style={{ color: verificationBadge.color }}
+                >
                   ● {verificationBadge.label}
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-2 text-xs text-slate-400">
+            <div className="flex items-center gap-2 text-xs" style={{ color: colors.muted }}>
               <span>{post.author?.player_profile?.primary_position}</span>
               <span>•</span>
               <span>{formatDate(post.created_at)}</span>
@@ -122,25 +156,47 @@ export function PostCard({ post, currentUserId, onLikeToggle }: PostCardProps) {
         </div>
 
         {/* Content Type Badge */}
-        <span className={`rounded-full border px-3 py-1 text-xs font-medium ${contentType.color}`}>
+        <div 
+          className="rounded-full px-3 py-1 text-xs font-medium"
+          style={{ 
+            backgroundColor: `${contentType.color}20`,
+            color: contentType.color,
+            border: `1px solid ${contentType.color}40`,
+            fontFamily: typography.family,
+            fontWeight: typography.medium
+          }}
+        >
           <span className="mr-1">{contentType.icon}</span>
           {contentType.label}
-        </span>
+        </div>
       </div>
 
-      {/* Media */}
-      <div className="relative aspect-video bg-slate-900">
+      {/* Media - Full Bleed */}
+      <div className="relative aspect-video" style={{ backgroundColor: colors.deepNavy }}>
         {post.media_type === "video" ? (
           <FeedVideo
             mediaUrl={post.media_url || undefined}
             mediaBucket={post.media_bucket || undefined}
             mediaPath={post.media_path || undefined}
+            muxPlaybackId={post.mux_playback_id || undefined}
+            trimStart={post.trim_start}
+            trimEnd={post.trim_end}
+            coverFrameTime={post.cover_frame_time}
+            spotlightTime={post.spotlight_time}
+            spotlightLabel={post.spotlight_label}
+            spotlightX={post.spotlight_x}
+            spotlightY={post.spotlight_y}
+            spotlightDuration={post.spotlight_duration}
+            spotlightStyle={post.spotlight_style}
+            spotlightKeyframes={post.spotlight_keyframes}
+            autoplay={isInView}
           />
         ) : (
           <img
             src={post.media_url || ''}
             alt={post.caption || "Post image"}
             className="h-full w-full object-cover"
+            style={{ borderRadius: 0 }}
           />
         )}
       </div>
@@ -149,20 +205,47 @@ export function PostCard({ post, currentUserId, onLikeToggle }: PostCardProps) {
       <div className="p-4 space-y-3">
         {/* Caption */}
         {post.caption && (
-          <p className="text-sm text-slate-200 leading-relaxed">{post.caption}</p>
+          <p 
+            style={{ 
+              fontFamily: typography.family,
+              color: colors.white,
+              fontSize: '16px',
+              lineHeight: 1.6
+            }}
+          >
+            {post.caption}
+          </p>
         )}
 
         {/* Tags */}
         <div className="flex flex-wrap gap-2">
           {post.position_tag && (
-            <span className="rounded-full bg-white/5 border border-white/10 px-3 py-1 text-xs text-slate-300">
+            <div 
+              className="rounded-full px-3 py-1 text-xs"
+              style={{ 
+                ...glassPanel,
+                color: colors.white,
+                fontFamily: typography.family,
+                fontWeight: typography.medium,
+                borderRadius: borderRadius.pill
+              }}
+            >
               ⚽ {post.position_tag}
-            </span>
+            </div>
           )}
           {post.club_history_tag && (
-            <span className="rounded-full bg-white/5 border border-white/10 px-3 py-1 text-xs text-slate-300">
-              🏟️ {post.club_history_tag}
-            </span>
+            <div 
+              className="rounded-full px-3 py-1 text-xs"
+              style={{ 
+                ...glassPanel,
+                color: colors.muted,
+                fontFamily: typography.family,
+                fontWeight: typography.medium,
+                borderRadius: borderRadius.pill
+              }}
+            >
+              � {post.club_history_tag}
+            </div>
           )}
           {post.match_tag && (
             <span className="rounded-full bg-white/5 border border-white/10 px-3 py-1 text-xs text-slate-300">

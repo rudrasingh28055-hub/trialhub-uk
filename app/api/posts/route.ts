@@ -94,6 +94,17 @@ export async function POST(request: Request) {
     const coverFrameTime = body.get("coverFrameTime") as string;
     const spotlightTime = body.get("spotlightTime") as string;
     const spotlightLabel = body.get("spotlightLabel") as string;
+    const spotlightX = body.get("spotlightX") as string;
+    const spotlightY = body.get("spotlightY") as string;
+    const spotlightDuration = body.get("spotlightDuration") as string;
+    
+    // New advanced spotlight fields
+    const spotlightStyle = body.get("spotlightStyle") as string;
+    const spotlightKeyframes = body.get("spotlightKeyframes") as string;
+    
+    // Mux video fields
+    const muxPlaybackId = body.get("muxPlaybackId") as string;
+    const muxAssetId = body.get("muxAssetId") as string;
 
     // Validate required fields
     if (!(mediaFile instanceof File) || !caption || !contentType || !mediaType || !visibility || !composerMode) {
@@ -263,6 +274,44 @@ export async function POST(request: Request) {
       if (coverFrameTimeNum !== undefined) postData.cover_frame_time = coverFrameTimeNum;
       if (spotlightTimeNum !== undefined) postData.spotlight_time = spotlightTimeNum;
       if (spotlightLabel) postData.spotlight_label = spotlightLabel;
+      
+      // New advanced spotlight fields
+      if (spotlightStyle) postData.spotlight_style = spotlightStyle;
+      
+      // Parse and validate spotlight keyframes JSON
+      if (spotlightKeyframes) {
+        try {
+          const parsedKeyframes = JSON.parse(spotlightKeyframes);
+          // Basic validation - ensure it's an array with required structure
+          if (Array.isArray(parsedKeyframes) && parsedKeyframes.every(kf => 
+            typeof kf === 'object' && 
+            kf !== null && 
+            typeof kf.id === 'string' && 
+            typeof kf.progress === 'number' && 
+            typeof kf.x === 'number' && 
+            typeof kf.y === 'number'
+          )) {
+            postData.spotlight_keyframes = parsedKeyframes;
+          } else {
+            console.warn('[posts] Invalid spotlight keyframes format, skipping');
+          }
+        } catch (error) {
+          console.warn('[posts] Failed to parse spotlight keyframes JSON:', error);
+        }
+      }
+      
+      // Add Mux video fields if available
+      if (muxPlaybackId) postData.mux_playback_id = muxPlaybackId;
+      if (muxAssetId) postData.mux_asset_id = muxAssetId;
+      
+      // Spotlight position fields (legacy compatibility)
+      const spotlightXNum = spotlightX ? parseFloat(spotlightX) : undefined;
+      const spotlightYNum = spotlightY ? parseFloat(spotlightY) : undefined;
+      const spotlightDurationNum = spotlightDuration ? parseInt(spotlightDuration, 10) : undefined;
+      
+      if (spotlightXNum !== undefined) postData.spotlight_x = spotlightXNum;
+      if (spotlightYNum !== undefined) postData.spotlight_y = spotlightYNum;
+      if (spotlightDurationNum !== undefined) postData.spotlight_duration = spotlightDurationNum;
     }
 
     console.log("[posts] Creating post with data:", postData);

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "../lib/supabase/client";
+import { colors, typography, styles, borderRadius } from "../lib/design/tokens";
 
 type Role = "athlete" | "club" | null;
 
@@ -65,11 +66,11 @@ export function UserMenuDropdown({ displayName, role, userEmail }: UserMenuDropd
   const getRoleColor = () => {
     switch (role) {
       case "athlete":
-        return "bg-emerald-500/20 text-emerald-300 border-emerald-500/30";
+        return { backgroundColor: `${colors.success}10`, border: `1px solid ${colors.success}30`, color: colors.success };
       case "club":
-        return "bg-sky-500/20 text-sky-300 border-sky-500/30";
+        return { backgroundColor: `${colors.accent}10`, border: `1px solid ${colors.accent}30`, color: colors.accent };
       default:
-        return "bg-slate-500/20 text-slate-300 border-slate-500/30";
+        return { backgroundColor: `${colors.muted}10`, border: `1px solid ${colors.muted}30`, color: colors.muted };
     }
   };
 
@@ -101,19 +102,42 @@ export function UserMenuDropdown({ displayName, role, userEmail }: UserMenuDropd
       {/* User Menu Trigger */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-2 transition-all hover:bg-white/10 hover:border-white/20"
+        className="flex items-center gap-3 px-4 py-2 transition-all"
+        style={{ 
+          ...styles.pillBorder,
+          backgroundColor: colors.card, 
+          border: `1px solid ${colors.surface}`
+        }}
       >
         <div className="text-left">
-          <div className="text-sm font-medium text-white">
+          <div 
+            className="text-sm font-medium"
+            style={{ 
+              color: colors.white,
+              fontFamily: typography.display,
+              fontWeight: "bold",
+              textTransform: "uppercase",
+              letterSpacing: "0.05em"
+            }}
+          >
             {displayName || "User"}
           </div>
           {role && (
-            <div className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${getRoleColor()}`}>
+            <div 
+              className="inline-flex items-center px-2 py-0.5 text-xs font-medium"
+              style={{ 
+                ...styles.pillBorder,
+                ...getRoleColor()
+              }}
+            >
               {role === "athlete" ? "Athlete" : "Club"}
             </div>
           )}
         </div>
-        <div className={`text-slate-400 transition-transform ${isOpen ? "rotate-180" : ""}`}>
+        <div 
+          className={`transition-transform ${isOpen ? "rotate-180" : ""}`}
+          style={{ color: colors.muted }}
+        >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
             <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
           </svg>
@@ -122,10 +146,23 @@ export function UserMenuDropdown({ displayName, role, userEmail }: UserMenuDropd
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 rounded-[16px] border border-white/10 bg-white/5 shadow-2xl backdrop-blur-xl overflow-hidden">
-          <div className="p-2">
+        <div 
+          className="absolute right-0 mt-2 w-48 overflow-hidden"
+          style={{ 
+            ...styles.sheetBorder,
+            backgroundColor: colors.card, 
+            border: `1px solid ${colors.surface}`
+          }}
+        >
+          <div style={{ padding: "8px" }}>
             {userEmail && (
-              <div className="px-3 py-2 text-xs text-slate-400 border-b border-white/5 mb-2">
+              <div 
+                className="px-3 py-2 text-xs mb-2"
+                style={{ 
+                  color: colors.muted,
+                  borderBottom: `1px solid ${colors.surface}`
+                }}
+              >
                 {userEmail}
               </div>
             )}
@@ -134,18 +171,26 @@ export function UserMenuDropdown({ displayName, role, userEmail }: UserMenuDropd
               <Link
                 key={item.href}
                 href={item.href}
-                className="block px-3 py-2 text-sm text-slate-300 rounded-lg transition-colors hover:bg-white/10 hover:text-white"
+                className="block px-3 py-2 text-sm rounded-lg transition-colors"
+                style={{ 
+                  color: colors.white,
+                  fontFamily: typography.body
+                }}
                 onClick={() => setIsOpen(false)}
               >
                 {item.label}
               </Link>
             ))}
             
-            <div className="border-t border-white/5 mt-2 pt-2">
+            <div style={{ borderTop: `1px solid ${colors.surface}`, marginTop: "8px", paddingTop: "8px" }}>
               <button
                 onClick={handleLogout}
                 disabled={isLoggingOut}
-                className="w-full px-3 py-2 text-sm text-red-400 rounded-lg transition-colors hover:bg-red-500/10 hover:text-red-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full px-3 py-2 text-sm rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ 
+                  color: colors.danger,
+                  fontFamily: typography.body
+                }}
               >
                 {isLoggingOut ? "Signing out..." : "Logout"}
               </button>

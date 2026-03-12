@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Navbar from "../../../components/Navbar";
+import Navbar from "@/components/Navbar";
 import { AthleteProfileHeader } from "../../../components/AthleteProfileHeader";
 import { AthletePublicPreview } from "../../../components/AthletePublicPreview";
 import { AthletePostsSection } from "../../../components/AthletePostsSection";
 import { createClient } from "../../../lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { colors, typography, styles, borderRadius } from "../../../lib/design/tokens";
 
 export default function AthleteProfilePage() {
   const router = useRouter();
@@ -187,10 +188,10 @@ export default function AthleteProfilePage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen overflow-x-hidden text-white">
+      <main className="min-h-screen overflow-x-hidden" style={{ color: colors.white }}>
         <Navbar />
         <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
-          <div className="rounded-[24px] border border-white/10 bg-white/5 p-6 shadow-xl lg:rounded-[28px] lg:p-8">
+          <div style={{ ...styles.sheetBorder, backgroundColor: colors.card, border: `1px solid ${colors.surface}`, padding: "24px" }}>
             Loading athlete profile...
           </div>
         </section>
@@ -199,7 +200,7 @@ export default function AthleteProfilePage() {
   }
 
   return (
-    <main className="min-h-screen overflow-x-hidden text-white">
+    <main className="min-h-screen overflow-x-hidden" style={{ color: colors.white }}>
       <Navbar />
 
       <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
@@ -216,17 +217,32 @@ export default function AthleteProfilePage() {
         <div className="flex flex-col gap-8 xl:flex-row">
           <div className="flex-1 space-y-8">
             {showEditMode && (
-              <div className="rounded-3xl border border-sky-400/30 bg-sky-500/10 p-4 backdrop-blur-sm">
+              <div className="p-4 backdrop-blur-sm"
+                style={{ 
+                  ...styles.sheetBorder,
+                  backgroundColor: `${colors.accent}10`, 
+                  border: `1px solid ${colors.accent}30`
+                }}
+              >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <svg className="h-5 w-5 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="h-5 w-5" style={{ color: colors.accent }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
-                    <span className="text-sm font-semibold text-sky-300">Edit Mode</span>
+                    <span 
+                      className="text-sm font-semibold"
+                      style={{ 
+                        ...styles.displayHeader,
+                        color: colors.accent
+                      }}
+                    >
+                      Edit Mode
+                    </span>
                   </div>
                   <button
                     onClick={() => setShowEditMode(false)}
-                    className="text-slate-400 transition-colors hover:text-white"
+                    className="transition-colors"
+                    style={{ color: colors.muted }}
                   >
                     <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -238,97 +254,173 @@ export default function AthleteProfilePage() {
 
             {showEditMode && (
               <>
-                <div className="rounded-[24px] border border-white/10 bg-white/5 p-6 shadow-xl">
-                  <p className="mb-6 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                <div style={{ ...styles.sheetBorder, backgroundColor: colors.card, border: `1px solid ${colors.surface}`, padding: "24px" }}>
+                  <p 
+                    className="mb-6 text-xs font-semibold uppercase tracking-[0.2em]"
+                    style={{ 
+                      ...styles.displayHeader,
+                      color: colors.muted
+                    }}
+                  >
                     Core Details
                   </p>
 
                   <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div className="space-y-2">
-                      <label className="text-xs font-medium text-slate-400">Age</label>
+                      <label className="text-xs font-medium" style={{ color: colors.muted }}>Age</label>
                       <input
                         placeholder="Age"
                         value={age}
                         onChange={(e) => setAge(e.target.value)}
-                        className="w-full rounded-2xl border border-white/10 bg-slate-950/40 px-4 py-3 text-sm text-white outline-none transition-all placeholder:text-slate-500 focus:border-sky-400/50 focus:bg-slate-950/60"
+                        className="w-full text-sm outline-none transition-all"
+                        style={{ 
+                          ...styles.buttonBorder,
+                          backgroundColor: colors.input, 
+                          border: `1px solid ${colors.surface}`, 
+                          color: colors.white,
+                          fontFamily: typography.body,
+                          padding: "12px 16px"
+                        }}
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-xs font-medium text-slate-400">Height (cm)</label>
+                      <label className="text-xs font-medium" style={{ color: colors.muted }}>Height (cm)</label>
                       <input
                         placeholder="Height"
                         value={height}
                         onChange={(e) => setHeight(e.target.value)}
-                        className="w-full rounded-2xl border border-white/10 bg-slate-950/40 px-4 py-3 text-sm text-white outline-none transition-all placeholder:text-slate-500 focus:border-sky-400/50 focus:bg-slate-950/60"
+                        className="w-full text-sm outline-none transition-all"
+                        style={{ 
+                          ...styles.buttonBorder,
+                          backgroundColor: colors.input, 
+                          border: `1px solid ${colors.surface}`, 
+                          color: colors.white,
+                          fontFamily: typography.body,
+                          padding: "12px 16px"
+                        }}
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-xs font-medium text-slate-400">Primary Position</label>
+                      <label className="text-xs font-medium" style={{ color: colors.muted }}>Primary Position</label>
                       <input
                         placeholder="e.g. CM, ST"
                         value={primaryPosition}
                         onChange={(e) => setPrimaryPosition(e.target.value)}
-                        className="w-full rounded-2xl border border-white/10 bg-slate-950/40 px-4 py-3 text-sm text-white outline-none transition-all placeholder:text-slate-500 focus:border-sky-400/50 focus:bg-slate-950/60"
+                        className="w-full text-sm outline-none transition-all"
+                        style={{ 
+                          ...styles.buttonBorder,
+                          backgroundColor: colors.input, 
+                          border: `1px solid ${colors.surface}`, 
+                          color: colors.white,
+                          fontFamily: typography.body,
+                          padding: "12px 16px"
+                        }}
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-xs font-medium text-slate-400">Secondary Position</label>
+                      <label className="text-xs font-medium" style={{ color: colors.muted }}>Secondary Position</label>
                       <input
                         placeholder="Secondary position"
                         value={secondaryPosition}
                         onChange={(e) => setSecondaryPosition(e.target.value)}
-                        className="w-full rounded-2xl border border-white/10 bg-slate-950/40 px-4 py-3 text-sm text-white outline-none transition-all placeholder:text-slate-500 focus:border-sky-400/50 focus:bg-slate-950/60"
+                        className="w-full text-sm outline-none transition-all"
+                        style={{ 
+                          ...styles.buttonBorder,
+                          backgroundColor: colors.input, 
+                          border: `1px solid ${colors.surface}`, 
+                          color: colors.white,
+                          fontFamily: typography.body,
+                          padding: "12px 16px"
+                        }}
                       />
                     </div>
 
                     <div className="space-y-2 md:col-span-2">
-                      <label className="text-xs font-medium text-slate-400">Dominant Foot</label>
+                      <label className="text-xs font-medium" style={{ color: colors.muted }}>Dominant Foot</label>
                       <input
                         placeholder="Right / Left"
                         value={dominantFoot}
                         onChange={(e) => setDominantFoot(e.target.value)}
-                        className="w-full rounded-2xl border border-white/10 bg-slate-950/40 px-4 py-3 text-sm text-white outline-none transition-all placeholder:text-slate-500 focus:border-sky-400/50 focus:bg-slate-950/60"
+                        className="w-full text-sm outline-none transition-all"
+                        style={{ 
+                          ...styles.buttonBorder,
+                          backgroundColor: colors.input, 
+                          border: `1px solid ${colors.surface}`, 
+                          color: colors.white,
+                          fontFamily: typography.body,
+                          padding: "12px 16px"
+                        }}
                       />
                     </div>
                   </div>
                 </div>
 
-                <div className="rounded-[24px] border border-white/10 bg-white/5 p-6 shadow-xl">
-                  <p className="mb-6 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                <div style={{ ...styles.sheetBorder, backgroundColor: colors.card, border: `1px solid ${colors.surface}`, padding: "24px" }}>
+                  <p 
+                    className="mb-6 text-xs font-semibold uppercase tracking-[0.2em]"
+                    style={{ 
+                      ...styles.displayHeader,
+                      color: colors.muted
+                    }}
+                  >
                     Career & Links
                   </p>
 
                   <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div className="space-y-2">
-                      <label className="text-xs font-medium text-slate-400">Previous Club</label>
+                      <label className="text-xs font-medium" style={{ color: colors.muted }}>Previous Club</label>
                       <input
                         placeholder="Previous club"
                         value={previousClub}
                         onChange={(e) => setPreviousClub(e.target.value)}
-                        className="w-full rounded-2xl border border-white/10 bg-slate-950/40 px-4 py-3 text-sm text-white outline-none transition-all placeholder:text-slate-500 focus:border-sky-400/50 focus:bg-slate-950/60"
+                        className="w-full text-sm outline-none transition-all"
+                        style={{ 
+                          ...styles.buttonBorder,
+                          backgroundColor: colors.input, 
+                          border: `1px solid ${colors.surface}`, 
+                          color: colors.white,
+                          fontFamily: typography.body,
+                          padding: "12px 16px"
+                        }}
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-xs font-medium text-slate-400">Highlight Video URL</label>
+                      <label className="text-xs font-medium" style={{ color: colors.muted }}>Highlight Video URL</label>
                       <input
                         placeholder="Video URL"
                         value={videoUrl}
                         onChange={(e) => setVideoUrl(e.target.value)}
-                        className="w-full rounded-2xl border border-white/10 bg-slate-950/40 px-4 py-3 text-sm text-white outline-none transition-all placeholder:text-slate-500 focus:border-sky-400/50 focus:bg-slate-950/60"
+                        className="w-full text-sm outline-none transition-all"
+                        style={{ 
+                          ...styles.buttonBorder,
+                          backgroundColor: colors.input, 
+                          border: `1px solid ${colors.surface}`, 
+                          color: colors.white,
+                          fontFamily: typography.body,
+                          padding: "12px 16px"
+                        }}
                       />
                     </div>
 
                     <div className="space-y-2 md:col-span-2">
-                      <label className="text-xs font-medium text-slate-400">Instagram URL</label>
+                      <label className="text-xs font-medium" style={{ color: colors.muted }}>Instagram URL</label>
                       <input
                         placeholder="Instagram URL"
                         value={instagram}
                         onChange={(e) => setInstagram(e.target.value)}
-                        className="w-full rounded-2xl border border-white/10 bg-slate-950/40 px-4 py-3 text-sm text-white outline-none transition-all placeholder:text-slate-500 focus:border-sky-400/50 focus:bg-slate-950/60"
+                        className="w-full text-sm outline-none transition-all"
+                        style={{ 
+                          ...styles.buttonBorder,
+                          backgroundColor: colors.input, 
+                          border: `1px solid ${colors.surface}`, 
+                          color: colors.white,
+                          fontFamily: typography.body,
+                          padding: "12px 16px"
+                        }}
                       />
                     </div>
                   </div>
@@ -338,9 +430,10 @@ export default function AthleteProfilePage() {
                   <div>
                     {message && (
                       <div
-                        className={`text-sm ${
-                          message.includes("successfully") ? "text-emerald-300" : "text-red-300"
-                        }`}
+                        className="text-sm"
+                        style={{
+                          color: message.includes("successfully") ? colors.success : colors.danger
+                        }}
                       >
                         {message}
                       </div>
@@ -350,7 +443,13 @@ export default function AthleteProfilePage() {
                   <div className="flex gap-3">
                     <button
                       onClick={() => setShowEditMode(false)}
-                      className="rounded-2xl border border-white/20 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-all duration-300 hover:border-white/30 hover:bg-white/20"
+                      className="px-6 py-3 text-sm font-semibold backdrop-blur-sm transition-all duration-300"
+                      style={{ 
+                        ...styles.buttonBorder,
+                        backgroundColor: "transparent", 
+                        color: colors.white,
+                        border: `1px solid ${colors.surface}`
+                      }}
                     >
                       Cancel
                     </button>
@@ -358,9 +457,16 @@ export default function AthleteProfilePage() {
                     <button
                       onClick={saveProfile}
                       disabled={saving}
-                      className="rounded-2xl bg-gradient-to-r from-sky-500 to-blue-500 px-6 py-3 text-sm font-semibold text-white transition-all duration-300 hover:shadow-xl hover:shadow-sky-500/25 disabled:opacity-60"
+                      className="px-6 py-3 text-sm font-semibold transition-all duration-300 disabled:opacity-60"
+                      style={{ 
+                        ...styles.buttonBorder,
+                        backgroundColor: colors.accent, 
+                        color: colors.white,
+                        fontFamily: typography.display,
+                        ...styles.displayHeader
+                      }}
                     >
-                      {saving ? "Saving..." : "Save Changes"}
+                      {saving ? "SAVING..." : "SAVE CHANGES"}
                     </button>
                   </div>
                 </div>
@@ -374,8 +480,15 @@ export default function AthleteProfilePage() {
 
           {showEditMode && (
             <div className="w-full xl:w-80">
-              <div className="rounded-[24px] border border-white/10 bg-white/5 p-6 shadow-xl">
-                <p className="mb-6 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+              <div style={{ ...styles.sheetBorder, backgroundColor: colors.card, border: `1px solid ${colors.surface}`, padding: "24px" }}>
+                <p 
+                  className="mb-6 text-xs font-semibold uppercase tracking-[0.2em]"
+                  style={{ 
+                    fontFamily: typography.display,
+                    ...styles.displayHeader,
+                    color: colors.muted
+                  }}
+                >
                   Profile Strength
                 </p>
 
@@ -390,13 +503,19 @@ export default function AthleteProfilePage() {
                   ].map(([label, value]) => (
                     <div
                       key={label}
-                      className="flex items-center justify-between rounded-2xl border border-white/10 bg-slate-950/30 px-4 py-3"
+                      className="flex items-center justify-between px-4 py-3"
+                      style={{ 
+                        ...styles.buttonBorder,
+                        backgroundColor: colors.surface, 
+                        border: `1px solid ${colors.input}`
+                      }}
                     >
-                      <span className="text-sm text-slate-300">{label}</span>
+                      <span className="text-sm" style={{ color: colors.white }}>{label}</span>
                       <span
-                        className={`text-xs font-semibold ${
-                          value ? "text-emerald-300" : "text-slate-500"
-                        }`}
+                        className="text-xs font-semibold"
+                        style={{
+                          color: value ? colors.success : colors.muted
+                        }}
                       >
                         {value ? "Added" : "Missing"}
                       </span>
@@ -404,40 +523,71 @@ export default function AthleteProfilePage() {
                   ))}
                 </div>
 
-                <div className="mt-6 border-t border-white/10 pt-6">
+                <div className="mt-6" style={{ borderTop: `1px solid ${colors.surface}`, paddingTop: "24px" }}>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-white">
+                    <div 
+                      className="text-2xl font-bold"
+                      style={{
+                        fontFamily: typography.display,
+                        ...styles.displayHeader,
+                        ...styles.displayHeader,
+                        color: colors.white
+                      }}
+                    >
                       {Math.round(
                         ([age, primaryPosition, dominantFoot, height, previousClub, videoUrl].filter(Boolean).length / 6) * 100
                       )}
                       %
                     </div>
-                    <div className="text-xs text-slate-400">Complete</div>
+                    <div className="text-xs" style={{ color: colors.muted }}>Complete</div>
                   </div>
                 </div>
               </div>
 
-              <div className="rounded-[24px] border border-emerald-400/30 bg-emerald-500/10 p-6 shadow-xl">
+              <div className="p-6 shadow-xl"
+                style={{ 
+                  ...styles.sheetBorder,
+                  backgroundColor: `${colors.success}10`, 
+                  border: `1px solid ${colors.success}30`,
+                  marginTop: "24px"
+                }}
+              >
                 <div className="mb-4 flex items-center gap-3">
-                  <svg className="h-5 w-5 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="h-5 w-5" style={{ color: colors.success }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-300">
+                  <p 
+                    className="text-xs font-semibold uppercase tracking-[0.2em]"
+                    style={{ 
+                      fontFamily: typography.display,
+                      ...styles.displayHeader,
+                      color: colors.success
+                    }}
+                  >
                     Pro Tips
                   </p>
                 </div>
 
-                <ul className="space-y-3 text-sm text-slate-300">
+                <ul className="space-y-3 text-sm" style={{ color: colors.white }}>
                   <li className="flex items-start gap-2">
-                    <div className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-emerald-400" />
+                    <div 
+                      className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full" 
+                      style={{ backgroundColor: colors.success }} 
+                    />
                     <span>Add a highlight video to showcase your skills</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <div className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-emerald-400" />
+                    <div 
+                      className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full" 
+                      style={{ backgroundColor: colors.success }} 
+                    />
                     <span>Complete all fields for maximum visibility</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <div className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-emerald-400" />
+                    <div 
+                      className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full" 
+                      style={{ backgroundColor: colors.success }} 
+                    />
                     <span>Connect Instagram to show your personality</span>
                   </li>
                 </ul>

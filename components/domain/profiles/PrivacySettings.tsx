@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import type { AccountVisibility, DiscoverabilityPolicy, MessagePolicy } from "@/lib/domain/profiles/types";
+import { colors, typography, styles, borderRadius } from "../../../lib/design/tokens";
 
 interface PrivacySettingsProps {
   initialSettings: {
@@ -27,18 +28,39 @@ export function PrivacySettings({ initialSettings, onSave }: PrivacySettingsProp
   };
 
   return (
-    <div className="bg-slate-800 rounded-lg p-6 space-y-6">
-      <h3 className="text-lg font-semibold text-white">Privacy Settings</h3>
+    <div style={{ ...styles.sheetBorder, backgroundColor: colors.card, border: `1px solid ${colors.surface}`, padding: "24px" }}>
+      <h3 
+        className="text-lg font-semibold"
+        style={{ 
+          color: colors.white,
+          fontFamily: typography.display,
+          fontWeight: "bold",
+          textTransform: "uppercase",
+          letterSpacing: "0.05em"
+        }}
+      >
+        Privacy Settings
+      </h3>
       
-      <div className="space-y-4">
+      <div className="space-y-4" style={{ marginTop: "24px" }}>
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-2">
+          <label 
+            className="block text-sm font-medium mb-2"
+            style={{ color: colors.white }}
+          >
             Account Visibility
           </label>
           <select
             value={settings.account_visibility}
             onChange={(e) => setSettings({...settings, account_visibility: e.target.value as any})}
-            className="w-full bg-slate-700 text-white rounded-lg px-3 py-2"
+            className="w-full px-3 py-2 rounded-lg outline-none transition-all"
+            style={{ 
+              ...styles.buttonBorder,
+              backgroundColor: colors.input, 
+              border: `1px solid ${colors.surface}`, 
+              color: colors.white,
+              fontFamily: typography.body
+            }}
           >
             <option value="public">Public</option>
             <option value="private">Private</option>
@@ -46,13 +68,23 @@ export function PrivacySettings({ initialSettings, onSave }: PrivacySettingsProp
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-2">
+          <label 
+            className="block text-sm font-medium mb-2"
+            style={{ color: colors.white }}
+          >
             Discoverability
           </label>
           <select
             value={settings.discoverability_policy}
             onChange={(e) => setSettings({...settings, discoverability_policy: e.target.value as any})}
-            className="w-full bg-slate-700 text-white rounded-lg px-3 py-2"
+            className="w-full px-3 py-2 rounded-lg outline-none transition-all"
+            style={{ 
+              ...styles.buttonBorder,
+              backgroundColor: colors.input, 
+              border: `1px solid ${colors.surface}`, 
+              color: colors.white,
+              fontFamily: typography.body
+            }}
           >
             <option value="everyone">Everyone</option>
             <option value="logged_in_only">Logged In Users Only</option>
@@ -61,13 +93,23 @@ export function PrivacySettings({ initialSettings, onSave }: PrivacySettingsProp
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-2">
+          <label 
+            className="block text-sm font-medium mb-2"
+            style={{ color: colors.white }}
+          >
             Message Policy
           </label>
           <select
             value={settings.message_policy}
             onChange={(e) => setSettings({...settings, message_policy: e.target.value as any})}
-            className="w-full bg-slate-700 text-white rounded-lg px-3 py-2"
+            className="w-full px-3 py-2 rounded-lg outline-none transition-all"
+            style={{ 
+              ...styles.buttonBorder,
+              backgroundColor: colors.input, 
+              border: `1px solid ${colors.surface}`, 
+              color: colors.white,
+              fontFamily: typography.body
+            }}
           >
             <option value="open">Open</option>
             <option value="requests">Requests Only</option>
@@ -79,9 +121,19 @@ export function PrivacySettings({ initialSettings, onSave }: PrivacySettingsProp
       <button
         onClick={handleSave}
         disabled={isLoading}
-        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+        className="px-4 py-2 rounded-lg transition-all disabled:opacity-50"
+        style={{ 
+          ...styles.buttonBorder,
+          backgroundColor: colors.accent, 
+          color: colors.white,
+          fontFamily: typography.display,
+          fontWeight: "bold",
+          textTransform: "uppercase",
+          letterSpacing: "0.05em",
+          marginTop: "24px"
+        }}
       >
-        {isLoading ? 'Saving...' : 'Save Settings'}
+        {isLoading ? 'SAVING...' : 'SAVE SETTINGS'}
       </button>
     </div>
   );

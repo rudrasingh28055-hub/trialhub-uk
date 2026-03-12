@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { uploadMediaFile } from "../../lib/feed/upload";
 import { POST_MEDIA_BUCKET } from "../../lib/storage/constants";
+import { colors, typography, styles, borderRadius } from "../../lib/design/tokens";
 
 interface MediaUploaderProps {
   onUploadComplete: (url: string, type: "image" | "video", bucket?: string, path?: string, file?: File) => void;
@@ -147,11 +148,12 @@ export function MediaUploader({ onUploadComplete, currentUrl, currentType }: Med
         onClick={() => fileInputRef.current?.click()}
         onDrop={handleDrop}
         onDragOver={(e) => e.preventDefault()}
-        className={`relative rounded-2xl border-2 border-dashed p-8 text-center transition-all cursor-pointer ${
-          isUploading
-            ? "border-sky-400 bg-sky-500/10"
-            : "border-white/20 hover:border-white/40 hover:bg-white/5"
-        }`}
+        className={`relative p-8 text-center transition-all cursor-pointer`}
+        style={{
+          ...styles.sheetBorder,
+          border: `2px dashed ${isUploading ? colors.accent : colors.surface}`,
+          backgroundColor: isUploading ? `${colors.accent}10` : "transparent"
+        }}
       >
         <input
           ref={fileInputRef}
@@ -164,37 +166,84 @@ export function MediaUploader({ onUploadComplete, currentUrl, currentType }: Med
         {isUploading ? (
           <div className="space-y-3">
             <div className="text-4xl">📤</div>
-            <p className="text-sky-400 font-medium">Uploading...</p>
-            <div className="w-full max-w-xs mx-auto bg-white/10 rounded-full h-2">
+            <p 
+              className="font-medium"
+              style={{ 
+                color: colors.accent,
+                fontFamily: typography.display,
+                fontWeight: "bold",
+                textTransform: "uppercase",
+                letterSpacing: "0.05em"
+              }}
+            >
+              Uploading...
+            </p>
+            <div className="w-full max-w-xs mx-auto" style={{ backgroundColor: colors.surface, height: "8px", borderRadius: "999px" }}>
               <div
-                className="bg-sky-500 h-2 rounded-full transition-all"
-                style={{ width: `${uploadProgress}%` }}
+                className="rounded-full transition-all"
+                style={{ 
+                  width: `${uploadProgress}%`,
+                  backgroundColor: colors.accent,
+                  height: "8px"
+                }}
               />
             </div>
           </div>
         ) : previewUrl ? (
           <div className="space-y-3">
-            <div className="relative aspect-video max-h-48 rounded-xl overflow-hidden bg-slate-900">
+            <div 
+              className="relative aspect-video max-h-48 rounded-xl overflow-hidden"
+              style={{ backgroundColor: colors.surface }}
+            >
               {mediaType === "video" ? (
                 <video src={previewUrl} className="h-full w-full object-cover" controls />
               ) : (
                 <img src={previewUrl} alt="Preview" className="h-full w-full object-cover" />
               )}
             </div>
-            <p className="text-sm text-slate-400">Click to change media</p>
+            <p 
+              className="text-sm"
+              style={{ color: colors.muted }}
+            >
+              Click to change media
+            </p>
           </div>
         ) : (
           <div className="space-y-3">
             <div className="text-4xl">📸</div>
-            <p className="text-white font-medium">Drop media here or click to upload</p>
-            <p className="text-sm text-slate-400">JPG, PNG, GIF, MP4, WEBM (max 50MB)</p>
+            <p 
+              className="font-medium"
+              style={{ 
+                color: colors.white,
+                fontFamily: typography.display,
+                fontWeight: "bold",
+                textTransform: "uppercase",
+                letterSpacing: "0.05em"
+              }}
+            >
+              Drop media here or click to upload
+            </p>
+            <p 
+              className="text-sm"
+              style={{ color: colors.muted }}
+            >
+              JPG, PNG, GIF, MP4, WEBM (max 50MB)
+            </p>
           </div>
         )}
       </div>
 
       {/* Error */}
       {error && (
-        <div className="rounded-xl bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400">
+        <div 
+          className="p-3 text-sm"
+          style={{ 
+            ...styles.sheetBorder,
+            backgroundColor: `${colors.danger}10`, 
+            border: `1px solid ${colors.danger}30`,
+            color: colors.danger
+          }}
+        >
           {error}
         </div>
       )}
@@ -202,10 +251,18 @@ export function MediaUploader({ onUploadComplete, currentUrl, currentType }: Med
       {/* Or URL Input */}
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-white/10"></div>
+          <div className="w-full" style={{ borderTop: `1px solid ${colors.surface}` }}></div>
         </div>
         <div className="relative flex justify-center">
-          <span className="bg-slate-900 px-2 text-sm text-slate-400">or paste URL</span>
+          <span 
+            className="px-2 text-sm"
+            style={{ 
+              backgroundColor: colors.black,
+              color: colors.muted
+            }}
+          >
+            or paste URL
+          </span>
         </div>
       </div>
     </div>

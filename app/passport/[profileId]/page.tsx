@@ -1,4 +1,4 @@
-import Navbar from "../../../components/Navbar";
+import Navbar from "@/components/Navbar";
 import { createClient } from "../../../lib/supabase/server";
 import { notFound } from "next/navigation";
 import { getPassportByProfileId } from "../../../lib/passport/actions";

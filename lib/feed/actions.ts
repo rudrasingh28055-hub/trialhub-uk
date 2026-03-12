@@ -287,7 +287,7 @@ export async function getPostComments(postId: string): Promise<{ comments: PostC
     .from("post_comments")
     .select(`
       *,
-      author:profiles(id, full_name, role, avatar_url)
+      author:profiles(id, full_name, role)
     `)
     .eq("post_id", postId)
     .is("parent_comment_id", null)
@@ -325,7 +325,7 @@ export async function addComment(postId: string, content: string, parentCommentI
     .insert(insertData)
     .select(`
       *,
-      author:profiles(id, full_name, role, avatar_url)
+      author:profiles(id, full_name, role)
     `)
     .single();
   

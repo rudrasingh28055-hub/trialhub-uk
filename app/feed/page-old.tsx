@@ -1,4 +1,4 @@
-import Navbar from "../../components/Navbar";
+import Navbar from "@/components/Navbar";
 import OpportunityCard from "../../components/OpportunityCard";
 import { createClient } from "../../lib/supabase/server";
 import { redirect } from "next/navigation";

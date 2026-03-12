@@ -60,7 +60,7 @@ values
   ('football', 'rb', 'Right-Back', 40),
   ('football', 'dm', 'Defensive Midfielder', 50),
   ('football', 'cm', 'Central Midfielder', 60),
-  ('football', 'am', 'Attacking Midfielder', 70),
+  ('football', 'cam', 'Central Attacking Midfielder', 70),
   ('football', 'lw', 'Left Winger', 80),
   ('football', 'rw', 'Right Winger', 90),
   ('football', 'st', 'Striker', 100)

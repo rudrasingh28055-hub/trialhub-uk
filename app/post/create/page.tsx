@@ -1,9 +1,8 @@
 import { redirect } from "next/navigation";
-import { createClient } from "../../../lib/supabase/server";
-import Navbar from "../../../components/Navbar";
-import PageHeader from "../../../components/layout/PageHeader";
-import { CreatePostClient } from "./CreatePostClient";
-import { DebugPanel } from "../../../components/DebugPanel";
+import { createClient } from "@/lib/supabase/server";
+import Navbar from "@/components/Navbar";
+import PageHeader from "@/components/layout/PageHeader";
+import { CreatePostComposer } from "@/components/CreatePostComposer";
 
 export default async function CreatePostPage() {
   const supabase = await createClient();
@@ -37,12 +36,10 @@ export default async function CreatePostPage() {
           />
 
           <div className="mt-8">
-            <CreatePostClient userId={user.id} />
+            <CreatePostComposer userId={user.id} />
           </div>
         </div>
       </section>
-      
-      <DebugPanel />
     </main>
   );
 }

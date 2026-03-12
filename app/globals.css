@@ -72,6 +72,11 @@ body {
   animation: glow 2s ease-in-out infinite;
 }
 
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.4); }
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
@@ -92,7 +97,7 @@ body {
 
 /* Selection styles */
 ::selection {
-  background: rgba(56, 189, 248, 0.3);
+  background: rgba(99, 102, 241, 0.3);
   color: white;
 }
 
@@ -100,4 +105,10 @@ body {
 .focus-visible:focus {
   outline: 2px solid rgba(56, 189, 248, 0.5);
   outline-offset: 2px;
+}
+
+/* AI spin animation */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }

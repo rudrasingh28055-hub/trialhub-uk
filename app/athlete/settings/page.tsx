@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Navbar from "../../../components/Navbar";
+import Navbar from "@/components/Navbar";
 import { PrivacySettings } from "../../../components/domain/profiles/PrivacySettings";
 import { createClient } from "../../../lib/supabase/client";
 import { useRouter } from "next/navigation";
 import type { AccountVisibility, DiscoverabilityPolicy, MessagePolicy } from "@/lib/domain/profiles/types";
+import { colors, typography, styles, borderRadius } from "../../../lib/design/tokens";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -78,10 +79,10 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen text-white overflow-x-hidden">
+      <main className="min-h-screen overflow-x-hidden" style={{ color: colors.white }}>
         <Navbar />
         <section className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
-          <div className="rounded-[24px] lg:rounded-[28px] border border-white/10 bg-white/5 p-6 lg:p-8 shadow-xl">
+          <div style={{ ...styles.sheetBorder, backgroundColor: colors.card, border: `1px solid ${colors.surface}`, padding: "24px" }}>
             Loading settings...
           </div>
         </section>
@@ -90,21 +91,32 @@ export default function SettingsPage() {
   }
 
   return (
-    <main className="min-h-screen text-white overflow-x-hidden">
+    <main className="min-h-screen overflow-x-hidden" style={{ color: colors.white }}>
       <Navbar />
       
       <section className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
         <div className="mb-6 lg:mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Settings</h1>
-          <p className="text-slate-400">Manage your account privacy and preferences</p>
+          <h1 
+            className="text-3xl font-bold mb-2"
+            style={{ 
+              fontFamily: typography.display,
+              ...styles.displayHeader,
+              color: colors.white
+            }}
+          >
+            Settings
+          </h1>
+          <p style={{ color: colors.muted }}>Manage your account privacy and preferences</p>
         </div>
 
         {message && (
-          <div className={`mb-6 p-4 rounded-lg ${
-            message.includes("successfully") 
-              ? "bg-green-500/20 text-green-400 border border-green-500/30" 
-              : "bg-red-500/20 text-red-400 border border-red-500/30"
-          }`}>
+          <div className="mb-6 p-4 rounded-lg"
+            style={{
+              backgroundColor: message.includes("successfully") ? `${colors.success}10` : `${colors.danger}10`,
+              border: message.includes("successfully") ? `1px solid ${colors.success}30` : `1px solid ${colors.danger}30`,
+              color: message.includes("successfully") ? colors.success : colors.danger
+            }}
+          >
             {message}
           </div>
         )}

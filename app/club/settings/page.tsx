@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Navbar from "../../../components/Navbar";
+import Navbar from "@/components/Navbar";
 import { PrivacySettings } from "../../../components/domain/profiles/PrivacySettings";
 import { createClient } from "../../../lib/supabase/client";
 import { useRouter } from "next/navigation";

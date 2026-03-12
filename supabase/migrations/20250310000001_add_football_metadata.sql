@@ -35,6 +35,9 @@ ALTER TABLE posts ADD COLUMN IF NOT EXISTS trim_end REAL;
 ALTER TABLE posts ADD COLUMN IF NOT EXISTS cover_frame_time REAL;
 ALTER TABLE posts ADD COLUMN IF NOT EXISTS spotlight_time REAL;
 ALTER TABLE posts ADD COLUMN IF NOT EXISTS spotlight_label TEXT;
+ALTER TABLE posts ADD COLUMN IF NOT EXISTS spotlight_x REAL;
+ALTER TABLE posts ADD COLUMN IF NOT EXISTS spotlight_y REAL;
+ALTER TABLE posts ADD COLUMN IF NOT EXISTS spotlight_duration INTEGER DEFAULT 2;
 
 -- Add visibility field (override existing default if needed)
 ALTER TABLE posts ADD COLUMN IF NOT EXISTS visibility TEXT DEFAULT 'public' 

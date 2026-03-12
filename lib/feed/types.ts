@@ -1,6 +1,15 @@
 export type PostContentType = 'highlight' | 'training' | 'achievement' | 'match_moment' | 'general';
 export type MediaType = 'video' | 'image';
 
+export type SpotlightStyle = 'soft_white' | 'dark_focus' | 'ring_glow';
+
+export interface SpotlightKeyframe {
+  id: 'start' | 'mid' | 'end';
+  progress: 0 | 0.5 | 1;
+  x: number; // percentage
+  y: number; // percentage
+}
+
 export interface Post {
   id: string;
   author_id: string;
@@ -31,8 +40,22 @@ export interface Post {
   trim_start?: number | null;
   trim_end?: number | null;
   cover_frame_time?: number | null;
+  
+  // Legacy spotlight fields (preserved for backward compatibility)
   spotlight_time?: number | null;
   spotlight_label?: string | null;
+  spotlight_x?: number | null;
+  spotlight_y?: number | null;
+  spotlight_duration?: number | null;
+  
+  // New advanced spotlight fields
+  spotlight_style?: SpotlightStyle | null;
+  spotlight_keyframes?: SpotlightKeyframe[] | null;
+  
+  // Mux video fields
+  mux_playback_id?: string | null;
+  mux_asset_id?: string | null;
+  
   visibility?: 'public' | 'followers' | null;
   
   // Legacy fields (preserved for backward compatibility)
@@ -96,7 +119,6 @@ export interface PostComment {
     id: string;
     full_name: string | null;
     role?: string;
-    avatar_url?: string;
   };
 }
 

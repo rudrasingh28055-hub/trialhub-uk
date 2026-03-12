@@ -7,6 +7,7 @@ import { PostCard } from "./PostCard";
 import { CreatePostForm } from "./CreatePostForm";
 import { FeedFilterBar } from "./FeedFilter";
 import type { Post, FeedFilter } from "../../lib/feed/types";
+import { colors, typography, styles, borderRadius } from "../../lib/design/tokens";
 
 interface FeedContainerProps {
   currentUserId?: string;
@@ -103,37 +104,45 @@ export function FeedContainer({ currentUserId, userRole }: FeedContainerProps) {
       {isLoading ? (
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="rounded-2xl border border-white/10 bg-white/5 p-6 animate-pulse">
+            <div key={i} className="animate-pulse" style={{ ...styles.sheetBorder, backgroundColor: colors.card, border: `1px solid ${colors.surface}`, padding: "24px" }}>
               <div className="flex items-center gap-4 mb-4">
-                <div className="h-10 w-10 rounded-full bg-white/10" />
+                <div className="h-10 w-10 rounded-full" style={{ backgroundColor: colors.surface }} />
                 <div className="space-y-2">
-                  <div className="h-4 w-32 rounded bg-white/10" />
-                  <div className="h-3 w-20 rounded bg-white/10" />
+                  <div className="h-4 w-32 rounded" style={{ backgroundColor: colors.surface }} />
+                  <div className="h-3 w-20 rounded" style={{ backgroundColor: colors.surface }} />
                 </div>
               </div>
-              <div className="aspect-video rounded-xl bg-white/10 mb-4" />
+              <div className="aspect-video rounded-lg mb-4" style={{ backgroundColor: colors.surface }} />
               <div className="space-y-2">
-                <div className="h-4 w-full rounded bg-white/10" />
-                <div className="h-4 w-2/3 rounded bg-white/10" />
+                <div className="h-4 w-full rounded" style={{ backgroundColor: colors.surface }} />
+                <div className="h-4 w-2/3 rounded" style={{ backgroundColor: colors.surface }} />
               </div>
             </div>
           ))}
         </div>
       ) : error ? (
-        <div className="rounded-2xl border border-red-400/20 bg-red-500/10 p-8 text-center">
-          <p className="text-red-400 mb-4">{error}</p>
+        <div className="text-center p-8" style={{ ...styles.sheetBorder, backgroundColor: `${colors.danger}10`, border: `1px solid ${colors.danger}30` }}>
+          <p style={{ color: colors.danger, marginBottom: "16px" }}>{error}</p>
           <button
             onClick={() => fetchPosts(1, true)}
-            className="rounded-full bg-red-500/20 border border-red-500/30 px-4 py-2 text-sm text-red-300 hover:bg-red-500/30 transition-colors"
+            className="px-4 py-2 text-sm transition-all"
+            style={{ 
+              ...styles.pillBorder,
+              backgroundColor: `${colors.danger}20`, 
+              border: `1px solid ${colors.danger}40`,
+              color: colors.danger
+            }}
           >
             Try again
           </button>
         </div>
       ) : posts.length === 0 ? (
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-12 text-center">
+        <div className="text-center p-12" style={{ ...styles.sheetBorder, backgroundColor: colors.card, border: `1px solid ${colors.surface}` }}>
           <div className="text-4xl mb-4">📭</div>
-          <h3 className="text-lg font-semibold text-white mb-2">No posts yet</h3>
-          <p className="text-slate-400 mb-6">
+          <h3 style={{ fontSize: "18px", color: colors.white, marginBottom: "8px", fontFamily: typography.display, fontWeight: "bold", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+            No posts yet
+          </h3>
+          <p style={{ color: colors.muted, marginBottom: "24px" }}>
             {filter.sortBy === 'following' 
               ? "Follow some players to see their posts here"
               : "Be the first to share a highlight or training moment"
@@ -142,7 +151,12 @@ export function FeedContainer({ currentUserId, userRole }: FeedContainerProps) {
           {filter.sortBy === 'following' && (
             <button
               onClick={() => setFilter({ sortBy: 'latest' })}
-              className="rounded-full bg-sky-500 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-400 transition-colors"
+              className="px-4 py-2 text-sm font-semibold transition-all"
+              style={{ 
+                ...styles.pillBorder,
+                backgroundColor: colors.accent, 
+                color: colors.white
+              }}
             >
               Explore all posts
             </button>
@@ -171,7 +185,13 @@ export function FeedContainer({ currentUserId, userRole }: FeedContainerProps) {
               <button
                 onClick={handleLoadMore}
                 disabled={isLoadingMore}
-                className="rounded-full border border-white/10 bg-white/5 px-6 py-3 text-sm font-medium text-slate-300 hover:bg-white/10 hover:text-white transition-colors disabled:opacity-50"
+                className="px-6 py-3 text-sm font-medium transition-all disabled:opacity-50"
+                style={{ 
+                  ...styles.pillBorder,
+                  backgroundColor: colors.card, 
+                  color: colors.muted,
+                  border: `1px solid ${colors.surface}`
+                }}
               >
                 {isLoadingMore ? (
                   <span className="flex items-center gap-2">

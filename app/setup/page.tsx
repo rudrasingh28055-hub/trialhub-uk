@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "../../lib/supabase/client";
+import { colors, typography, styles, borderRadius } from "../../lib/design/tokens";
 
 type Role = "athlete" | "club";
 
@@ -174,63 +175,82 @@ export default function SetupPage() {
 
   if (loadingProfile) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-        <div className="flex items-center justify-center h-screen">
-          <div className="text-white">Loading...</div>
-        </div>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: colors.black }}>
+        <div style={{ color: colors.white }}>Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+    <div className="min-h-screen" style={{ backgroundColor: colors.black }}>
       <div className="flex min-h-screen flex-col justify-center px-4 py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
-          <h2 className="text-center text-3xl font-bold tracking-tight text-white">
+          <h2 
+            className="text-center text-3xl font-bold tracking-tight"
+            style={{ 
+              fontFamily: typography.display,
+              ...styles.displayHeader,
+              color: colors.white
+            }}
+          >
             Complete Your Profile
           </h2>
-          <p className="mt-2 text-center text-sm text-slate-400">
+          <p 
+            className="mt-2 text-center text-sm"
+            style={{ color: colors.muted }}
+          >
             Tell us about yourself to get started
           </p>
         </div>
 
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-          <div className="bg-slate-800 px-6 py-8 shadow-lg sm:rounded-lg sm:px-8">
+          <div style={{ ...styles.sheetBorder, backgroundColor: colors.card, border: `1px solid ${colors.surface}`, padding: "32px" }}>
             {message && (
               <div className={`mb-4 p-3 rounded text-sm ${
                 message.includes("success") 
-                  ? "bg-green-500/20 text-green-400" 
-                  : "bg-red-500/20 text-red-400"
-              }`}>
+                  ? ""
+                  : ""
+              }`}
+              style={{ 
+                backgroundColor: message.includes("success") ? `${colors.success}10` : `${colors.danger}10`,
+                border: message.includes("success") ? `1px solid ${colors.success}30` : `1px solid ${colors.danger}30`,
+                color: message.includes("success") ? colors.success : colors.danger
+              }}
+              >
                 {message}
               </div>
             )}
 
             <form className="space-y-6" onSubmit={handleSave}>
               <div>
-                <label className="block text-sm font-medium text-slate-300">
+                <label 
+                  className="block text-sm font-medium"
+                  style={{ color: colors.white }}
+                >
                   I am a
                 </label>
                 <div className="mt-2 flex gap-4">
                   <button
                     type="button"
                     onClick={() => setRole("athlete")}
-                    className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
-                      role === "athlete"
-                        ? "bg-blue-600 text-white"
-                        : "bg-slate-700 text-slate-300 hover:bg-slate-600"
-                    }`}
+                    className="flex-1 py-2 px-4 font-medium transition-colors rounded-lg"
+                    style={{
+                      ...styles.buttonBorder,
+                      backgroundColor: role === "athlete" ? colors.accent : colors.surface,
+                      color: role === "athlete" ? colors.white : colors.muted
+                    }}
                   >
                     Athlete
                   </button>
                   <button
                     type="button"
                     onClick={() => setRole("club")}
-                    className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
-                      role === "club"
-                        ? "bg-blue-600 text-white"
-                        : "bg-slate-700 text-slate-300 hover:bg-slate-600"
-                    }`}
+                    className="flex-1 py-2 px-4 font-medium transition-colors rounded-lg"
+                    style={{
+                      ...styles.buttonBorder,
+                      backgroundColor: role === "club" ? colors.accent : colors.surface,
+                      color: role === "club" ? colors.white : colors.muted
+                    }}
                   >
                     Club
                   </button>
@@ -238,7 +258,7 @@ export default function SetupPage() {
               </div>
 
               <div>
-                <label htmlFor="fullName" className="block text-sm font-medium text-slate-300">
+                <label htmlFor="fullName" className="block text-sm font-medium" style={{ color: colors.white }}>
                   Full Name
                 </label>
                 <div className="mt-2">
@@ -249,14 +269,22 @@ export default function SetupPage() {
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="block w-full rounded-lg border-0 bg-slate-700 py-2 text-white shadow-sm ring-1 ring-inset ring-slate-600 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
+                    className="block w-full text-white shadow-sm sm:text-sm sm:leading-6 outline-none transition-all"
+                    style={{ 
+                      ...styles.buttonBorder,
+                      backgroundColor: colors.input, 
+                      border: `1px solid ${colors.surface}`, 
+                      color: colors.white,
+                      fontFamily: typography.body,
+                      padding: "8px 12px"
+                    }}
                     placeholder="Enter your full name"
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="city" className="block text-sm font-medium text-slate-300">
+                <label htmlFor="city" className="block text-sm font-medium" style={{ color: colors.white }}>
                   City
                 </label>
                 <div className="mt-2">
@@ -266,7 +294,15 @@ export default function SetupPage() {
                     type="text"
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
-                    className="block w-full rounded-lg border-0 bg-slate-700 py-2 text-white shadow-sm ring-1 ring-inset ring-slate-600 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
+                    className="block w-full text-white shadow-sm sm:text-sm sm:leading-6 outline-none transition-all"
+                    style={{ 
+                      ...styles.buttonBorder,
+                      backgroundColor: colors.input, 
+                      border: `1px solid ${colors.surface}`, 
+                      color: colors.white,
+                      fontFamily: typography.body,
+                      padding: "8px 12px"
+                    }}
                     placeholder="Enter your city"
                   />
                 </div>
@@ -276,9 +312,16 @@ export default function SetupPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="flex w-full justify-center rounded-lg bg-blue-600 py-2 px-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex w-full justify-center py-2 px-3 text-sm font-semibold shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed rounded-lg"
+                  style={{ 
+                    ...styles.buttonBorder,
+                    backgroundColor: colors.accent, 
+                    color: colors.white,
+                    fontFamily: typography.display,
+                    ...styles.displayHeader
+                  }}
                 >
-                  {saving ? "Saving..." : "Complete Profile"}
+                  {saving ? "SAVING..." : "COMPLETE PROFILE"}
                 </button>
               </div>
             </form>

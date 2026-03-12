@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { FeedFilter, PostContentType } from "../../lib/feed/types";
+import { colors, typography, styles, borderRadius } from "../../lib/design/tokens";
 
 interface FeedFilterProps {
   filter: FeedFilter;
@@ -61,7 +62,7 @@ export function FeedFilterBar({ filter, onFilterChange, currentUserId }: FeedFil
   };
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm p-4">
+    <div style={{ ...styles.sheetBorder, backgroundColor: colors.card, border: `1px solid ${colors.surface}`, padding: "16px" }}>
       {/* Main Filter Row */}
       <div className="flex flex-wrap items-center gap-2 mb-4">
         {/* Content Type Pills */}
@@ -69,11 +70,19 @@ export function FeedFilterBar({ filter, onFilterChange, currentUserId }: FeedFil
           <button
             key={type.value}
             onClick={() => handleContentTypeChange(type.value)}
-            className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
-              (type.value === 'all' && !filter.contentType) || filter.contentType === type.value
-                ? "border-sky-400 bg-sky-500/20 text-sky-300"
-                : "border-white/10 bg-white/5 text-slate-400 hover:border-white/20 hover:text-slate-300"
-            }`}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-all"
+            style={{ 
+              ...styles.pillBorder,
+              backgroundColor: (type.value === 'all' && !filter.contentType) || filter.contentType === type.value 
+                ? `${colors.accent}20` 
+                : 'transparent',
+              color: (type.value === 'all' && !filter.contentType) || filter.contentType === type.value 
+                ? colors.accent 
+                : colors.muted,
+              border: (type.value === 'all' && !filter.contentType) || filter.contentType === type.value 
+                ? `1px solid ${colors.accent}40` 
+                : `1px solid ${colors.surface}`
+            }}
           >
             <span>{type.icon}</span>
             <span>{type.label}</span>
@@ -86,36 +95,40 @@ export function FeedFilterBar({ filter, onFilterChange, currentUserId }: FeedFil
         <div className="flex items-center gap-4">
           {/* Sort Options */}
           <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-500">Sort:</span>
+            <span style={{ fontSize: "12px", color: colors.muted }}>Sort:</span>
             <div className="flex gap-1">
               <button
                 onClick={() => handleSortChange('latest')}
-                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-                  filter.sortBy === 'latest'
-                    ? "bg-white/10 text-white"
-                    : "text-slate-400 hover:text-slate-300"
-                }`}
+                className="px-3 py-1.5 text-xs font-medium transition-colors rounded-lg"
+                style={{ 
+                  backgroundColor: filter.sortBy === 'latest' ? colors.surface : 'transparent',
+                  color: filter.sortBy === 'latest' ? colors.white : colors.muted,
+                  ...styles.buttonBorder
+                }}
               >
                 Latest
               </button>
               <button
                 onClick={() => handleSortChange('popular')}
-                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-                  filter.sortBy === 'popular'
-                    ? "bg-white/10 text-white"
-                    : "text-slate-400 hover:text-slate-300"
-                }`}
+                className="px-3 py-1.5 text-xs font-medium transition-colors rounded-lg"
+                style={{ 
+                  backgroundColor: filter.sortBy === 'popular' ? colors.surface : 'transparent',
+                  color: filter.sortBy === 'popular' ? colors.white : colors.muted,
+                  ...styles.buttonBorder
+                }}
               >
                 Popular
               </button>
               {currentUserId && (
                 <button
                   onClick={handleFollowingToggle}
-                  className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-                    filter.sortBy === 'following'
-                      ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                      : "text-slate-400 hover:text-slate-300"
-                  }`}
+                  className="px-3 py-1.5 text-xs font-medium transition-colors rounded-lg"
+                  style={{ 
+                    backgroundColor: filter.sortBy === 'following' ? `${colors.success}20` : 'transparent',
+                    color: filter.sortBy === 'following' ? colors.success : colors.muted,
+                    border: filter.sortBy === 'following' ? `1px solid ${colors.success}40` : '1px solid transparent',
+                    ...styles.buttonBorder
+                  }}
                 >
                   Following
                 </button>
@@ -126,11 +139,17 @@ export function FeedFilterBar({ filter, onFilterChange, currentUserId }: FeedFil
           {/* Position Filter (when expanded) */}
           {isExpanded && (
             <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-500">Position:</span>
+              <span style={{ fontSize: "12px", color: colors.muted }}>Position:</span>
               <select
                 value={filter.position || ""}
                 onChange={(e) => handlePositionChange(e.target.value)}
-                className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white focus:border-sky-400 focus:outline-none"
+                className="px-3 py-1.5 text-xs transition-all rounded-lg"
+                style={{ 
+                  backgroundColor: colors.input, 
+                  border: `1px solid ${colors.surface}`, 
+                  color: colors.white,
+                  ...styles.buttonBorder
+                }}
               >
                 <option value="">All positions</option>
                 {positions.map((pos) => (
@@ -144,7 +163,8 @@ export function FeedFilterBar({ filter, onFilterChange, currentUserId }: FeedFil
         {/* Expand/Collapse */}
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="text-xs text-slate-400 hover:text-white transition-colors flex items-center gap-1"
+          className="text-xs transition-colors flex items-center gap-1"
+          style={{ color: colors.muted }}
         >
           {isExpanded ? "Less filters" : "More filters"}
           <svg
@@ -160,26 +180,42 @@ export function FeedFilterBar({ filter, onFilterChange, currentUserId }: FeedFil
 
       {/* Active Filters Display */}
       {(filter.position || filter.contentType) && (
-        <div className="mt-4 flex items-center gap-2 border-t border-white/10 pt-3">
-          <span className="text-xs text-slate-500">Active:</span>
+        <div className="mt-4 flex items-center gap-2" style={{ borderTop: `1px solid ${colors.surface}`, paddingTop: "12px" }}>
+          <span style={{ fontSize: "12px", color: colors.muted }}>Active:</span>
           {filter.contentType && (
-            <span className="flex items-center gap-1 rounded-full bg-sky-500/10 border border-sky-500/20 px-2 py-1 text-xs text-sky-300">
+            <span className="flex items-center gap-1 px-2 py-1 text-xs"
+              style={{ 
+                ...styles.pillBorder,
+                backgroundColor: `${colors.accent}10`, 
+                border: `1px solid ${colors.accent}30`,
+                color: colors.accent
+              }}
+            >
               {contentTypes.find(t => t.value === filter.contentType)?.icon}
               {contentTypes.find(t => t.value === filter.contentType)?.label}
               <button
                 onClick={() => handleContentTypeChange('all')}
                 className="ml-1 hover:text-white"
+                style={{ color: colors.accent }}
               >
                 ×
               </button>
             </span>
           )}
           {filter.position && (
-            <span className="flex items-center gap-1 rounded-full bg-violet-500/10 border border-violet-500/20 px-2 py-1 text-xs text-violet-300">
+            <span className="flex items-center gap-1 px-2 py-1 text-xs"
+              style={{ 
+                ...styles.pillBorder,
+                backgroundColor: `${colors.accent}10`, 
+                border: `1px solid ${colors.accent}30`,
+                color: colors.accent
+              }}
+            >
               ⚽ {filter.position}
               <button
                 onClick={() => handlePositionChange(filter.position!)}
                 className="ml-1 hover:text-white"
+                style={{ color: colors.accent }}
               >
                 ×
               </button>
@@ -187,7 +223,8 @@ export function FeedFilterBar({ filter, onFilterChange, currentUserId }: FeedFil
           )}
           <button
             onClick={() => onFilterChange({ sortBy: 'latest' })}
-            className="text-xs text-slate-400 hover:text-white ml-auto"
+            className="text-xs ml-auto"
+            style={{ color: colors.muted }}
           >
             Clear all
           </button>
