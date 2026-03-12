@@ -1384,10 +1384,10 @@ const videoDurationRef = useRef<number>(47); // Default fallback duration
                       </h2>
 
                       {/* Video Preview */}
-                      <div className="mb-6">
+                      <div className="mb-4">
                         {composer.highlight.muxPlaybackId ? (
   <div
-    style={{ position: 'relative', width: '100%', height: '300px', borderRadius: '16px', overflow: 'hidden', cursor: composer.placingKeyframe ? 'crosshair' : 'default' }}
+    style={{ position: 'relative', width: '100%', borderRadius: '16px', overflow: 'hidden', cursor: composer.placingKeyframe ? 'crosshair' : 'default' }}
     onClick={handleVideoAreaClick}
   >
     {composer.placingKeyframe && (
@@ -1525,6 +1525,114 @@ const videoDurationRef = useRef<number>(47); // Default fallback duration
         </div>
       )
     })()}
+    {/* AI assistant overlay — bottom of video */}
+    <div style={{
+      position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 25,
+      background: 'linear-gradient(transparent, rgba(0,0,0,0.75))',
+      padding: '32px 12px 12px',
+      pointerEvents: 'none'
+    }}>
+      <div style={{ pointerEvents: 'auto' }}>
+        {/* Idle: show AI button */}
+        {!aiSuggestion && !aiApplied && !aiAnalysing && (
+          <button
+            onClick={(e) => { e.stopPropagation(); analyseWithAI() }}
+            style={{
+              width: '100%', padding: '10px',
+              background: 'linear-gradient(135deg, rgba(124,58,237,0.85), rgba(37,99,235,0.85))',
+              backdropFilter: 'blur(8px)',
+              border: '1px solid rgba(255,255,255,0.15)',
+              borderRadius: '10px', color: 'white',
+              fontWeight: 700, fontSize: '13px', cursor: 'pointer'
+            }}
+          >
+            ✨ AI Detect Best Moment
+          </button>
+        )}
+
+        {/* Analysing: show progress */}
+        {aiAnalysing && (
+          <div style={{
+            textAlign: 'center', color: 'rgba(255,255,255,0.85)',
+            fontSize: 13, fontWeight: 600,
+            background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)',
+            borderRadius: 10, padding: '10px'
+          }}>
+            <span style={{ marginRight: 6 }}>⚙️</span>{aiStep || 'Analysing...'}
+          </div>
+        )}
+
+        {/* Error */}
+        {aiError && !aiAnalysing && (
+          <div style={{
+            color: '#FCD34D', fontSize: 12, textAlign: 'center',
+            background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)',
+            borderRadius: 8, padding: '6px 10px'
+          }}>
+            ⚠️ {aiError} —{' '}
+            <span
+              onClick={(e) => { e.stopPropagation(); analyseWithAI() }}
+              style={{ textDecoration: 'underline', cursor: 'pointer' }}
+            >
+              retry
+            </span>
+          </div>
+        )}
+
+        {/* AI found result */}
+        {aiSuggestion && !aiApplied && (
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            background: 'rgba(124,58,237,0.85)', backdropFilter: 'blur(8px)',
+            borderRadius: 10, padding: '8px 12px'
+          }}>
+            <div style={{ flex: 1, color: 'white', fontSize: 12 }}>
+              <span style={{ fontWeight: 700 }}>✨ Best moment</span>
+              {' '}at {aiSuggestion.startTime.toFixed(1)}s
+            </div>
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                if (!aiSuggestion) return
+                const s = composer.highlight.spotlight
+                updateHighlight({
+                  spotlight: {
+                    enabled: true,
+                    style: s?.style || 'soft_white',
+                    startTime: aiSuggestion.startTime,
+                    durationSeconds: Math.min(Math.round(aiSuggestion.endTime - aiSuggestion.startTime), 3) as 1|2|3 || 2,
+                    keyframes: s?.keyframes || [
+                      { id: 'start', progress: 0, x: 50, y: 50 },
+                      { id: 'mid', progress: 0.5, x: 50, y: 50 },
+                      { id: 'end', progress: 1, x: 50, y: 50 }
+                    ],
+                    label: s?.label
+                  }
+                })
+                setAiApplied(true)
+              }}
+              style={{
+                padding: '4px 12px', background: 'white', color: '#7C3AED',
+                fontWeight: 700, fontSize: 12, borderRadius: 6, border: 'none', cursor: 'pointer'
+              }}
+            >
+              Apply →
+            </button>
+          </div>
+        )}
+
+        {/* Applied confirmation */}
+        {aiApplied && (
+          <div style={{
+            color: '#6EE7B7', fontSize: 12, textAlign: 'center',
+            background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)',
+            borderRadius: 8, padding: '6px 10px', fontWeight: 600
+          }}>
+            ✅ Spotlight applied — place keyframes below
+          </div>
+        )}
+      </div>
+    </div>
   </div>
                         ) : (
                           <HighlightVideoPreview
@@ -1544,139 +1652,83 @@ const videoDurationRef = useRef<number>(47); // Default fallback duration
                         )}
                       </div>
 
-                      {/* AI Analysis */}
-                      {!aiSuggestion && (
-                        <>
-                          <button
-                            onClick={analyseWithAI}
-                            disabled={aiAnalysing}
-                            style={{
-                              width: '100%',
-                              padding: '12px',
-                              background: aiAnalysing 
-                                ? 'rgba(124,58,237,0.3)' 
-                                : 'linear-gradient(135deg, #7C3AED, #2563EB)',
-                              border: 'none',
-                              borderRadius: '12px',
-                              color: 'white',
-                              fontWeight: 700,
-                              fontSize: '14px',
-                              cursor: aiAnalysing ? 'not-allowed' : 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              gap: '8px',
-                              marginBottom: '4px'
-                            }}
-                          >
-                            {aiAnalysing ? (
-                              <>
-                                <span style={{ animation: 'spin 1s linear infinite' }}>⚙️</span>
-                                {aiStep || 'Analysing...'}
-                              </>
-                            ) : (
-                              <>✨ AI Detect Best Moment</>
-                            )}
-                          </button>
-                          <p style={{ 
-                            fontSize: 11, 
-                            color: 'rgba(255,255,255,0.3)', 
-                            textAlign: 'center',
-                            marginTop: 4 
-                          }}>
-                            AI analysis works best with clips under 45MB
-                          </p>
-                        </>
-                      )}
-
-                      {aiError && (
-                        <p style={{ 
-                          color: '#F59E0B', 
-                          fontSize: 13, 
-                          textAlign: 'center',
-                          padding: '8px',
-                          background: 'rgba(245,158,11,0.1)',
-                          borderRadius: 8,
-                          marginTop: 8
+                      {/* Inline spotlight placement — shown when a spotlight exists */}
+                      {composer.highlight.spotlight && (
+                        <div style={{
+                          background: 'rgba(124,58,237,0.08)',
+                          border: '1px solid rgba(124,58,237,0.25)',
+                          borderRadius: '12px',
+                          padding: '12px',
+                          marginBottom: '12px'
                         }}>
-                          ⚠️ {aiError}
-                        </p>
-                      )}
+                          <div style={{ color: '#A78BFA', fontSize: 12, fontWeight: 700, marginBottom: 10 }}>
+                            🎯 SPOTLIGHT PLACEMENT
+                            <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 400, marginLeft: 8 }}>
+                              tap a point, then click the video
+                            </span>
+                          </div>
 
-                      {aiApplied ? (
-  <div style={{
-    background: 'rgba(16,185,129,0.15)',
-    border: '1px solid rgba(16,185,129,0.4)',
-    borderRadius: '12px',
-    padding: '12px 16px',
-    color: '#10B981',
-    fontWeight: 600,
-    fontSize: 14,
-    textAlign: 'center',
-    marginBottom: '16px'
-  }}>
-    ✅ Spotlight applied at {aiSuggestion?.startTime.toFixed(1)}s
-    — scroll down to see Spotlight tab
-  </div>
-) : aiSuggestion ? (
-  <div style={{
-    background: 'rgba(124,58,237,0.15)',
-    border: '1px solid rgba(124,58,237,0.4)',
-    borderRadius: '12px',
-    padding: '16px',
-    marginBottom: '16px'
-  }}>
-    <p style={{ color: '#A78BFA', fontWeight: 700, marginBottom: 4 }}>
-      ✨ AI found your best moment
-    </p>
-    <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: 14 }}>
-      {aiSuggestion.description}
-    </p>
-    <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, marginTop: 4 }}>
-      At {aiSuggestion.startTime.toFixed(1)}s — {aiSuggestion.endTime.toFixed(1)}s
-    </p>
-    <button
-      onClick={() => {
-  if (!aiSuggestion) return
-  const s = composer.highlight.spotlight
-  updateHighlight({
-    spotlight: {
-      enabled: true,
-      style: s?.style || 'soft_white',
-      startTime: aiSuggestion.startTime,
-      durationSeconds: Math.min(
-        Math.round(aiSuggestion.endTime - aiSuggestion.startTime),
-        3
-      ) as 1 | 2 | 3 || 2,
-      keyframes: s?.keyframes || [
-        { id: 'start', progress: 0, x: 50, y: 50 },
-        { id: 'mid', progress: 0.5, x: 50, y: 50 },
-        { id: 'end', progress: 1, x: 50, y: 50 }
-      ],
-      label: s?.label
-    }
-  })
-  // Switch to spotlight tab so user can see it applied
-  updateEditTab('spotlight')
-  setAiApplied(true)
-}}
+                          {/* Style */}
+                          <div className="flex gap-2 mb-3">
+                            {([
+                              { id: 'soft_white', label: 'Soft' },
+                              { id: 'dark_focus', label: 'Focus' },
+                              { id: 'ring_glow', label: 'Ring' }
+                            ] as const).map(s => (
+                              <button
+                                key={s.id}
+                                onClick={() => updateSpotlightStyle(s.id)}
+                                style={{
+                                  flex: 1, padding: '5px 0', fontSize: 11, fontWeight: 600,
+                                  borderRadius: 8, border: 'none', cursor: 'pointer',
+                                  background: composer.highlight.spotlight?.style === s.id
+                                    ? '#7C3AED' : 'rgba(255,255,255,0.07)',
+                                  color: 'white'
+                                }}
+                              >
+                                {s.label}
+                              </button>
+                            ))}
+                          </div>
+
+                          {/* Keyframe placement */}
+                          <div className="flex gap-2 mb-2">
+                            {(['start', 'mid', 'end'] as const).map(kid => (
+                              <button
+                                key={kid}
+                                onClick={() => setComposer(prev => ({ ...prev, placingKeyframe: kid, showEditSheet: false }))}
+                                style={{
+                                  flex: 1, padding: '6px 0', fontSize: 11, fontWeight: 700,
+                                  borderRadius: 8, border: 'none', cursor: 'pointer',
+                                  background: composer.placingKeyframe === kid
+                                    ? '#7C3AED' : 'rgba(255,255,255,0.07)',
+                                  color: composer.placingKeyframe === kid ? 'white' : 'rgba(255,255,255,0.6)',
+                                  textTransform: 'capitalize'
+                                }}
+                              >
+                                {kid}
+                              </button>
+                            ))}
+                          </div>
+
+                          {composer.placingKeyframe && (
+                            <p style={{ color: '#A78BFA', fontSize: 11, textAlign: 'center', marginTop: 4 }}>
+                              ↑ Click the video to place <strong>{composer.placingKeyframe}</strong> point
+                            </p>
+                          )}
+
+                          <button
+                            onClick={() => updateHighlight({ spotlight: undefined })}
                             style={{
-                              marginTop: '12px',
-                              padding: '8px 16px',
-                              background: 'rgba(124,58,237,0.4)',
-                              border: '1px solid rgba(124,58,237,0.6)',
-                              borderRadius: '8px',
-                              color: 'white',
-                              fontWeight: 600,
-                              fontSize: '13px',
-                              cursor: 'pointer',
-                              width: '100%'
+                              width: '100%', marginTop: 8, padding: '4px', fontSize: 11,
+                              background: 'transparent', border: '1px solid rgba(239,68,68,0.3)',
+                              borderRadius: 6, color: 'rgba(239,68,68,0.7)', cursor: 'pointer'
                             }}
                           >
-                            Apply AI Spotlight →
+                            Clear spotlight
                           </button>
                         </div>
-) : null}
+                      )}
 
                       {/* Edit Button */}
                       <button 
