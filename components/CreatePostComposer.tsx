@@ -1386,248 +1386,112 @@ const videoDurationRef = useRef<number>(47); // Default fallback duration
                       {/* Video Preview */}
                       <div className="mb-4">
                         {composer.highlight.muxPlaybackId ? (
-  <div
-    style={{ position: 'relative', width: '100%', borderRadius: '16px', overflow: 'hidden', cursor: composer.placingKeyframe ? 'crosshair' : 'default' }}
-    onClick={handleVideoAreaClick}
-  >
-    {composer.placingKeyframe && (
-      <div style={{
-        position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)',
-        background: 'rgba(124,58,237,0.9)', color: 'white', fontSize: 12,
-        padding: '4px 12px', borderRadius: 999, zIndex: 30, pointerEvents: 'none',
-        whiteSpace: 'nowrap'
-      }}>
-        Click to place <strong>{composer.placingKeyframe}</strong> point
-      </div>
-    )}
-    <MuxPlayer
-      playbackId={composer.highlight.muxPlaybackId}
-      style={{
-        width: '100%',
-        height: '300px',
-        borderRadius: '16px'
-      }}
-      autoPlay={false}
-      muted={false}
-      onDurationChange={(evt: any) => {
-        const duration = evt?.detail?.duration ?? evt?.target?.duration ?? 0
-        if (duration > 0) {
-          videoDurationRef.current = duration
-          updateHighlight({ duration: duration })
-        }
-      }}
-      onLoadedMetadata={(evt: any) => {
-        const duration = evt?.target?.duration ?? evt?.detail?.duration ?? 0
-        if (duration > 0) {
-          videoDurationRef.current = duration
-          updateHighlight({ duration: duration })
-        }
-      }}
-      onTimeUpdate={(evt: any) => {
-        const time = evt?.target?.currentTime ?? evt?.detail?.currentTime ?? 0
-        if (time > 0) updateHighlight({ currentTime: time })
-      }}
-    />
-    {/* Spotlight overlay for Mux videos */}
-    {(() => {
-      const spotlight = composer.highlight.spotlight
-      const currentTime = composer.highlight.currentTime || 0
-      const canShow = !!spotlight && isSpotlightVisible(spotlight, currentTime)
-      const spotlightPos = spotlight && canShow 
-        ? interpolateSpotlightPosition(spotlight, currentTime) 
-        : null
-      
-      if (!canShow || !spotlightPos || !spotlight) return null
-      
-      return (
-        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 20 }}>
-          {spotlight.style === 'soft_white' && (
-            <>
-              <div style={{
-                position: 'absolute',
-                width: 128, height: 128,
-                borderRadius: '50%',
-                opacity: 0.3,
-                left: `${spotlightPos.x}%`,
-                top: `${spotlightPos.y}%`,
-                transform: 'translate(-50%, -50%)',
-                background: 'radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.4) 30%, transparent 70%)',
-                filter: 'blur(8px)'
-              }} />
-              <div style={{
-                position: 'absolute',
-                width: 80, height: 80,
-                borderRadius: '50%',
-                left: `${spotlightPos.x}%`,
-                top: `${spotlightPos.y}%`,
-                transform: 'translate(-50%, -50%)',
-                background: 'radial-gradient(circle, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.2) 40%, transparent 80%)'
-              }} />
-            </>
-          )}
-          {spotlight.style === 'dark_focus' && (
-            <>
-              <div style={{
-                position: 'absolute', inset: 0,
-                background: `radial-gradient(circle at ${spotlightPos.x}% ${spotlightPos.y}%, transparent 15%, rgba(0,0,0,0.7) 50%)` 
-              }} />
-              <div style={{
-                position: 'absolute',
-                width: 96, height: 96,
-                borderRadius: '50%',
-                left: `${spotlightPos.x}%`,
-                top: `${spotlightPos.y}%`,
-                transform: 'translate(-50%, -50%)',
-                border: '2px solid rgba(255,255,255,0.3)',
-                boxShadow: '0 0 20px rgba(255,255,255,0.2)'
-              }} />
-            </>
-          )}
-          {spotlight.style === 'ring_glow' && (
-            <>
-              <div style={{
-                position: 'absolute',
-                width: 64, height: 64,
-                borderRadius: '50%',
-                left: `${spotlightPos.x}%`,
-                top: `${spotlightPos.y}%`,
-                transform: 'translate(-50%, -50%)',
-                border: '3px solid rgba(139,92,246,0.8)',
-                boxShadow: '0 0 30px rgba(139,92,246,0.6), inset 0 0 20px rgba(139,92,246,0.3)'
-              }} />
-              <div style={{
-                position: 'absolute',
-                width: 96, height: 96,
-                borderRadius: '50%',
-                left: `${spotlightPos.x}%`,
-                top: `${spotlightPos.y}%`,
-                transform: 'translate(-50%, -50%)',
-                border: '1px solid rgba(139,92,246,0.4)',
-                boxShadow: '0 0 40px rgba(139,92,246,0.3)'
-              }} />
-            </>
-          )}
-          {spotlight.label && (
-            <div style={{
-              position: 'absolute',
-              background: 'rgba(139,92,246,0.9)',
-              color: 'white',
-              fontSize: 12,
-              padding: '2px 8px',
-              borderRadius: 999,
-              left: `${spotlightPos.x}%`,
-              top: `${spotlightPos.y + 8}%`,
-              transform: 'translateX(-50%)'
-            }}>
-              {spotlight.label}
-            </div>
-          )}
+  <div style={{ position: 'relative', width: '100%', borderRadius: '16px' }}>
+    {/* Video + spotlight — this div handles keyframe placement clicks */}
+    <div
+      style={{ position: 'relative', width: '100%', borderRadius: '16px', overflow: 'hidden', cursor: composer.placingKeyframe ? 'crosshair' : 'default' }}
+      onClick={handleVideoAreaClick}
+    >
+      {composer.placingKeyframe && (
+        <div style={{
+          position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)',
+          background: 'rgba(124,58,237,0.9)', color: 'white', fontSize: 12,
+          padding: '4px 12px', borderRadius: 999, zIndex: 30, pointerEvents: 'none',
+          whiteSpace: 'nowrap'
+        }}>
+          Click to place <strong>{composer.placingKeyframe}</strong> point
         </div>
-      )
-    })()}
-    {/* AI assistant overlay — bottom of video */}
-    <div style={{
-      position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 25,
-      background: 'linear-gradient(transparent, rgba(0,0,0,0.75))',
-      padding: '32px 12px 12px',
-      pointerEvents: 'none'
-    }}>
+      )}
+      <MuxPlayer
+        playbackId={composer.highlight.muxPlaybackId}
+        style={{ width: '100%', height: '300px', borderRadius: '16px' }}
+        autoPlay={false}
+        muted={false}
+        onDurationChange={(evt: any) => {
+          const duration = evt?.detail?.duration ?? evt?.target?.duration ?? 0
+          if (duration > 0) { videoDurationRef.current = duration; updateHighlight({ duration }) }
+        }}
+        onLoadedMetadata={(evt: any) => {
+          const duration = evt?.target?.duration ?? evt?.detail?.duration ?? 0
+          if (duration > 0) { videoDurationRef.current = duration; updateHighlight({ duration }) }
+        }}
+        onTimeUpdate={(evt: any) => {
+          const time = evt?.target?.currentTime ?? evt?.detail?.currentTime ?? 0
+          if (time > 0) updateHighlight({ currentTime: time })
+        }}
+      />
+      {/* Spotlight overlay */}
+      {(() => {
+        const spotlight = composer.highlight.spotlight
+        const currentTime = composer.highlight.currentTime || 0
+        const canShow = !!spotlight && isSpotlightVisible(spotlight, currentTime)
+        const spotlightPos = canShow ? interpolateSpotlightPosition(spotlight!, currentTime) : null
+        if (!canShow || !spotlightPos || !spotlight) return null
+        return (
+          <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 20 }}>
+            {spotlight.style === 'soft_white' && (<>
+              <div style={{ position: 'absolute', width: 128, height: 128, borderRadius: '50%', opacity: 0.3, left: `${spotlightPos.x}%`, top: `${spotlightPos.y}%`, transform: 'translate(-50%,-50%)', background: 'radial-gradient(circle,rgba(255,255,255,0.8) 0%,rgba(255,255,255,0.4) 30%,transparent 70%)', filter: 'blur(8px)' }} />
+              <div style={{ position: 'absolute', width: 80, height: 80, borderRadius: '50%', left: `${spotlightPos.x}%`, top: `${spotlightPos.y}%`, transform: 'translate(-50%,-50%)', background: 'radial-gradient(circle,rgba(255,255,255,0.6) 0%,rgba(255,255,255,0.2) 40%,transparent 80%)' }} />
+            </>)}
+            {spotlight.style === 'dark_focus' && (<>
+              <div style={{ position: 'absolute', inset: 0, background: `radial-gradient(circle at ${spotlightPos.x}% ${spotlightPos.y}%,transparent 15%,rgba(0,0,0,0.7) 50%)` }} />
+              <div style={{ position: 'absolute', width: 96, height: 96, borderRadius: '50%', left: `${spotlightPos.x}%`, top: `${spotlightPos.y}%`, transform: 'translate(-50%,-50%)', border: '2px solid rgba(255,255,255,0.3)', boxShadow: '0 0 20px rgba(255,255,255,0.2)' }} />
+            </>)}
+            {spotlight.style === 'ring_glow' && (<>
+              <div style={{ position: 'absolute', width: 64, height: 64, borderRadius: '50%', left: `${spotlightPos.x}%`, top: `${spotlightPos.y}%`, transform: 'translate(-50%,-50%)', border: '3px solid rgba(139,92,246,0.8)', boxShadow: '0 0 30px rgba(139,92,246,0.6),inset 0 0 20px rgba(139,92,246,0.3)' }} />
+              <div style={{ position: 'absolute', width: 96, height: 96, borderRadius: '50%', left: `${spotlightPos.x}%`, top: `${spotlightPos.y}%`, transform: 'translate(-50%,-50%)', border: '1px solid rgba(139,92,246,0.4)', boxShadow: '0 0 40px rgba(139,92,246,0.3)' }} />
+            </>)}
+            {spotlight.label && (
+              <div style={{ position: 'absolute', background: 'rgba(139,92,246,0.9)', color: 'white', fontSize: 12, padding: '2px 8px', borderRadius: 999, left: `${spotlightPos.x}%`, top: `${spotlightPos.y + 8}%`, transform: 'translateX(-50%)' }}>
+                {spotlight.label}
+              </div>
+            )}
+          </div>
+        )
+      })()}
+    </div>
+
+    {/* AI overlay — sibling to the video div so it's never blocked by MuxPlayer's shadow DOM */}
+    <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 30, background: 'linear-gradient(transparent,rgba(0,0,0,0.75))', padding: '32px 12px 12px', borderBottomLeftRadius: 16, borderBottomRightRadius: 16, pointerEvents: 'none' }}>
       <div style={{ pointerEvents: 'auto' }}>
-        {/* Idle: show AI button */}
         {!aiSuggestion && !aiApplied && !aiAnalysing && (
           <button
-            onClick={(e) => { e.stopPropagation(); analyseWithAI() }}
-            style={{
-              width: '100%', padding: '10px',
-              background: 'linear-gradient(135deg, rgba(124,58,237,0.85), rgba(37,99,235,0.85))',
-              backdropFilter: 'blur(8px)',
-              border: '1px solid rgba(255,255,255,0.15)',
-              borderRadius: '10px', color: 'white',
-              fontWeight: 700, fontSize: '13px', cursor: 'pointer'
-            }}
+            onClick={analyseWithAI}
+            style={{ width: '100%', padding: '10px', background: 'linear-gradient(135deg,rgba(124,58,237,0.9),rgba(37,99,235,0.9))', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '10px', color: 'white', fontWeight: 700, fontSize: '13px', cursor: 'pointer' }}
           >
             ✨ AI Detect Best Moment
           </button>
         )}
-
-        {/* Analysing: show progress */}
         {aiAnalysing && (
-          <div style={{
-            textAlign: 'center', color: 'rgba(255,255,255,0.85)',
-            fontSize: 13, fontWeight: 600,
-            background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)',
-            borderRadius: 10, padding: '10px'
-          }}>
-            <span style={{ marginRight: 6 }}>⚙️</span>{aiStep || 'Analysing...'}
+          <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.85)', fontSize: 13, fontWeight: 600, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)', borderRadius: 10, padding: '10px' }}>
+            ⚙️ {aiStep || 'Analysing...'}
           </div>
         )}
-
-        {/* Error */}
         {aiError && !aiAnalysing && (
-          <div style={{
-            color: '#FCD34D', fontSize: 12, textAlign: 'center',
-            background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)',
-            borderRadius: 8, padding: '6px 10px'
-          }}>
-            ⚠️ {aiError} —{' '}
-            <span
-              onClick={(e) => { e.stopPropagation(); analyseWithAI() }}
-              style={{ textDecoration: 'underline', cursor: 'pointer' }}
-            >
-              retry
-            </span>
+          <div style={{ color: '#FCD34D', fontSize: 12, textAlign: 'center', background: 'rgba(0,0,0,0.5)', borderRadius: 8, padding: '6px 10px' }}>
+            ⚠️ {aiError} — <span onClick={analyseWithAI} style={{ textDecoration: 'underline', cursor: 'pointer' }}>retry</span>
           </div>
         )}
-
-        {/* AI found result */}
         {aiSuggestion && !aiApplied && (
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: 8,
-            background: 'rgba(124,58,237,0.85)', backdropFilter: 'blur(8px)',
-            borderRadius: 10, padding: '8px 12px'
-          }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(124,58,237,0.9)', backdropFilter: 'blur(8px)', borderRadius: 10, padding: '8px 12px' }}>
             <div style={{ flex: 1, color: 'white', fontSize: 12 }}>
-              <span style={{ fontWeight: 700 }}>✨ Best moment</span>
-              {' '}at {aiSuggestion.startTime.toFixed(1)}s
+              <span style={{ fontWeight: 700 }}>✨ Best moment</span> at {aiSuggestion.startTime.toFixed(1)}s
             </div>
             <button
-              onClick={(e) => {
-                e.stopPropagation()
+              onClick={() => {
                 if (!aiSuggestion) return
                 const s = composer.highlight.spotlight
-                updateHighlight({
-                  spotlight: {
-                    enabled: true,
-                    style: s?.style || 'soft_white',
-                    startTime: aiSuggestion.startTime,
-                    durationSeconds: Math.min(Math.round(aiSuggestion.endTime - aiSuggestion.startTime), 3) as 1|2|3 || 2,
-                    keyframes: s?.keyframes || [
-                      { id: 'start', progress: 0, x: 50, y: 50 },
-                      { id: 'mid', progress: 0.5, x: 50, y: 50 },
-                      { id: 'end', progress: 1, x: 50, y: 50 }
-                    ],
-                    label: s?.label
-                  }
-                })
+                updateHighlight({ spotlight: { enabled: true, style: s?.style || 'soft_white', startTime: aiSuggestion.startTime, durationSeconds: Math.min(Math.round(aiSuggestion.endTime - aiSuggestion.startTime), 3) as 1|2|3 || 2, keyframes: s?.keyframes || [{ id: 'start', progress: 0, x: 50, y: 50 }, { id: 'mid', progress: 0.5, x: 50, y: 50 }, { id: 'end', progress: 1, x: 50, y: 50 }], label: s?.label } })
                 setAiApplied(true)
               }}
-              style={{
-                padding: '4px 12px', background: 'white', color: '#7C3AED',
-                fontWeight: 700, fontSize: 12, borderRadius: 6, border: 'none', cursor: 'pointer'
-              }}
+              style={{ padding: '4px 12px', background: 'white', color: '#7C3AED', fontWeight: 700, fontSize: 12, borderRadius: 6, border: 'none', cursor: 'pointer' }}
             >
               Apply →
             </button>
           </div>
         )}
-
-        {/* Applied confirmation */}
         {aiApplied && (
-          <div style={{
-            color: '#6EE7B7', fontSize: 12, textAlign: 'center',
-            background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)',
-            borderRadius: 8, padding: '6px 10px', fontWeight: 600
-          }}>
+          <div style={{ color: '#6EE7B7', fontSize: 12, textAlign: 'center', background: 'rgba(0,0,0,0.5)', borderRadius: 8, padding: '6px 10px', fontWeight: 600 }}>
             ✅ Spotlight applied — place keyframes below
           </div>
         )}
