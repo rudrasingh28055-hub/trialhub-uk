@@ -11,6 +11,18 @@ interface Props {
   onProgress?: (progress: number) => void
 }
 
+function parseMuxError(raw: string): string {
+  try {
+    // Mux SDK errors look like: "400 {"error":{"type":"...","messages":["..."]}}"
+    const jsonStart = raw.indexOf('{')
+    if (jsonStart === -1) return raw
+    const parsed = JSON.parse(raw.slice(jsonStart))
+    const messages: string[] = parsed?.error?.messages
+    if (messages?.length) return messages[0]
+  } catch {}
+  return raw
+}
+
 export default function MuxVideoUploader({ onUploadComplete, onProgress }: Props) {
   const [uploading, setUploading] = useState(false)
   const [progress, setProgress] = useState(0)
@@ -35,7 +47,7 @@ export default function MuxVideoUploader({ onUploadComplete, onProgress }: Props
       
       if (error || !uploadUrl) {
         console.warn('Failed to get upload URL:', error)
-        setError(error || 'Failed to prepare upload. Please try again.')
+        setError(parseMuxError(error) || 'Failed to prepare upload. Please try again.')
         setUploading(false)
         return
       }
