@@ -52,14 +52,11 @@ export default async function FeedPage() {
             <Link
               href="/post/create"
               className="flex items-center gap-2 transition-all"
-              style={{ 
-                ...styles.pillBorder, 
-                backgroundColor: colors.accent, 
+              style={{
+                backgroundColor: colors.accent,
                 color: colors.white,
                 padding: "12px 24px",
                 fontSize: "14px",
-                fontWeight: "600",
-                fontFamily: typography.display,
                 ...styles.displayHeader
               }}
             >

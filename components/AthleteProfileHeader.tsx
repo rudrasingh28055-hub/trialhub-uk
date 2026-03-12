@@ -230,7 +230,6 @@ export function AthleteProfileHeader({
             <h1 
               className="text-2xl font-bold"
               style={{ 
-                fontFamily: typography.display,
                 ...styles.displayHeader,
                 color: colors.white
               }}
@@ -337,7 +336,6 @@ export function AthleteProfileHeader({
             <h3 
               className="text-sm font-semibold"
               style={{ 
-                fontFamily: typography.display,
                 ...styles.displayHeader,
                 color: colors.white
               }}
@@ -352,7 +350,6 @@ export function AthleteProfileHeader({
             <div 
               className="text-2xl font-bold"
               style={{ 
-                fontFamily: typography.display,
                 ...styles.displayHeader,
                 color: colors.white
               }}

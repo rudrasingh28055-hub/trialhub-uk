@@ -162,7 +162,7 @@ export default function PlayerProfile({ playerId }: PlayerProfileProps) {
                   style={{ 
                     fontFamily: typography.family,
                     color: colors.muted,
-                    fontSize: typography.body.max
+                    fontSize: typography.body
                   }}
                 >
                   {player.club} • {player.nationality}
@@ -399,7 +399,6 @@ export default function PlayerProfile({ playerId }: PlayerProfileProps) {
                           key={i}
                           className="aspect-video rounded-lg"
                           style={{ 
-                            backgroundColor: colors.deepNavy,
                             ...glassPanel
                           }}
                         >

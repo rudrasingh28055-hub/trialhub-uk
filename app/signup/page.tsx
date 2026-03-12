@@ -78,7 +78,6 @@ export default function SignupPage() {
           <p 
             className="text-sm font-semibold uppercase tracking-[0.2em]"
             style={{ 
-              fontFamily: typography.display,
               ...styles.displayHeader,
               color: colors.accent
             }}
@@ -88,7 +87,6 @@ export default function SignupPage() {
           <h1 
             className="mt-3 text-3xl font-bold"
             style={{ 
-              fontFamily: typography.display,
               ...styles.displayHeader,
               color: colors.white
             }}
@@ -116,7 +114,6 @@ export default function SignupPage() {
                 color: colors.white,
                 fontFamily: typography.body
               }}
-              placeholderStyle={{ color: colors.muted }}
               required
             />
 
@@ -133,7 +130,6 @@ export default function SignupPage() {
                 color: colors.white,
                 fontFamily: typography.body
               }}
-              placeholderStyle={{ color: colors.muted }}
               required
             />
 
@@ -145,7 +141,6 @@ export default function SignupPage() {
                 ...styles.buttonBorder,
                 backgroundColor: colors.accent, 
                 color: colors.white,
-                fontFamily: typography.display,
                 ...styles.displayHeader
               }}
             >

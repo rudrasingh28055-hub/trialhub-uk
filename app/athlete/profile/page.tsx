@@ -462,7 +462,6 @@ export default function AthleteProfilePage() {
                         ...styles.buttonBorder,
                         backgroundColor: colors.accent, 
                         color: colors.white,
-                        fontFamily: typography.display,
                         ...styles.displayHeader
                       }}
                     >
@@ -484,7 +483,6 @@ export default function AthleteProfilePage() {
                 <p 
                   className="mb-6 text-xs font-semibold uppercase tracking-[0.2em]"
                   style={{ 
-                    fontFamily: typography.display,
                     ...styles.displayHeader,
                     color: colors.muted
                   }}
@@ -528,8 +526,6 @@ export default function AthleteProfilePage() {
                     <div 
                       className="text-2xl font-bold"
                       style={{
-                        fontFamily: typography.display,
-                        ...styles.displayHeader,
                         ...styles.displayHeader,
                         color: colors.white
                       }}
@@ -559,7 +555,6 @@ export default function AthleteProfilePage() {
                   <p 
                     className="text-xs font-semibold uppercase tracking-[0.2em]"
                     style={{ 
-                      fontFamily: typography.display,
                       ...styles.displayHeader,
                       color: colors.success
                     }}

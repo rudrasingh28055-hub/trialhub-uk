@@ -89,7 +89,6 @@ export function CommentsSection({ postId, currentUserId, isOpen, onClose, commen
               <h4 
                 className="text-sm font-semibold"
                 style={{ 
-                  fontFamily: typography.display,
                   ...styles.displayHeader,
                   color: colors.white
                 }}
@@ -159,7 +158,6 @@ export function CommentsSection({ postId, currentUserId, isOpen, onClose, commen
                         <span 
                           className="font-medium text-sm"
                           style={{ 
-                            fontFamily: typography.display,
                             ...styles.displayHeader,
                             color: colors.white
                           }}

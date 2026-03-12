@@ -93,7 +93,6 @@ export function AthletePostsSection({ userId, userName }: AthletePostsSectionPro
           <h2 
             className="text-2xl font-bold"
             style={{ 
-              fontFamily: typography.display,
               ...styles.displayHeader,
               color: colors.white
             }}
@@ -113,7 +112,6 @@ export function AthletePostsSection({ userId, userName }: AthletePostsSectionPro
             <div 
               className="text-2xl font-bold"
               style={{ 
-                fontFamily: typography.display,
                 ...styles.displayHeader,
                 color: colors.white
               }}
@@ -177,7 +175,6 @@ export function AthletePostsSection({ userId, userName }: AthletePostsSectionPro
           <h3 
             className="text-xl font-semibold mb-3"
             style={{ 
-              fontFamily: typography.display,
               ...styles.displayHeader,
               color: colors.white
             }}
@@ -238,7 +235,6 @@ export function AthletePostsSection({ userId, userName }: AthletePostsSectionPro
             <h4 
               className="text-lg font-semibold mb-4"
               style={{ 
-                fontFamily: typography.display,
                 ...styles.displayHeader,
                 color: colors.white
               }}

@@ -99,7 +99,6 @@ export default function SettingsPage() {
           <h1 
             className="text-3xl font-bold mb-2"
             style={{ 
-              fontFamily: typography.display,
               ...styles.displayHeader,
               color: colors.white
             }}

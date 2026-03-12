@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { colors, typography, borderRadius, glassPanel, gradient, pitchGrid } from "../../lib/design/tokens";
+import AppLayout from "../../components/AppLayout";
 
 interface PlayerCard {
   id: string;
@@ -150,7 +151,7 @@ export default function ScoutDiscovery() {
                 style={{ 
                   fontFamily: typography.family,
                   color: colors.muted,
-                  fontSize: typography.body.max
+                  fontSize: typography.body
                 }}
               >
                 Discover and evaluate the next generation of football talent
@@ -176,7 +177,7 @@ export default function ScoutDiscovery() {
                   className="w-full px-6 py-4 bg-transparent border-0 outline-none text-white placeholder-gray-500"
                   style={{ 
                     fontFamily: typography.family,
-                    fontSize: typography.body.max
+                    fontSize: typography.body
                   }}
                 />
                 <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
@@ -490,7 +491,7 @@ export default function ScoutDiscovery() {
                       className="px-6 py-4 border-t"
                       style={{ borderColor: colors.glass.border }}
                     >
-                      <button 
+                      <motion.button
                         className="w-full py-3 font-medium rounded-lg transition-all"
                         style={{
                           fontFamily: typography.family,
@@ -504,7 +505,7 @@ export default function ScoutDiscovery() {
                         whileTap={{ scale: 0.98 }}
                       >
                         View Full Profile
-                      </button>
+                      </motion.button>
                     </div>
                   </motion.div>
                 );

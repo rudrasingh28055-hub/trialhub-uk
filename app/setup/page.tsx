@@ -188,7 +188,6 @@ export default function SetupPage() {
           <h2 
             className="text-center text-3xl font-bold tracking-tight"
             style={{ 
-              fontFamily: typography.display,
               ...styles.displayHeader,
               color: colors.white
             }}
@@ -317,7 +316,6 @@ export default function SetupPage() {
                     ...styles.buttonBorder,
                     backgroundColor: colors.accent, 
                     color: colors.white,
-                    fontFamily: typography.display,
                     ...styles.displayHeader
                   }}
                 >

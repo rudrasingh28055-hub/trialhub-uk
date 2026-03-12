@@ -73,7 +73,6 @@ export function QuickActionsPanel({ userRole, className = "" }: QuickActionsPane
           <h3 
             className="text-2xl font-black"
             style={{ 
-              fontFamily: typography.display,
               ...styles.displayHeader,
               color: colors.white
             }}
@@ -155,7 +154,6 @@ export function QuickActionsPanel({ userRole, className = "" }: QuickActionsPane
                 <h4 
                   className="text-lg font-bold transition-colors"
                   style={{ 
-                    fontFamily: typography.display,
                     ...styles.displayHeader,
                     color: colors.white
                   }}

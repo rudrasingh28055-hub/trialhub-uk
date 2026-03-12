@@ -86,7 +86,6 @@ export default function LoginPage() {
           <p 
             className="text-sm font-semibold uppercase tracking-[0.2em]"
             style={{ 
-              fontFamily: typography.display,
               ...styles.displayHeader,
               color: colors.accent
             }}
@@ -96,7 +95,6 @@ export default function LoginPage() {
           <h1 
             className="mt-3 text-3xl font-bold"
             style={{ 
-              fontFamily: typography.display,
               ...styles.displayHeader,
               color: colors.white
             }}
@@ -118,13 +116,11 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-3 text-sm outline-none transition-all"
               style={{ 
-                ...styles.buttonBorder,
                 backgroundColor: colors.input, 
                 border: `1px solid ${colors.surface}`, 
                 color: colors.white,
                 fontFamily: typography.body
               }}
-              placeholderStyle={{ color: colors.muted }}
               required
             />
 
@@ -133,15 +129,13 @@ export default function LoginPage() {
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 text-sm outline-none transition-all"
+              className="w-full px-4 py-3"
               style={{ 
-                ...styles.buttonBorder,
                 backgroundColor: colors.input, 
                 border: `1px solid ${colors.surface}`, 
                 color: colors.white,
                 fontFamily: typography.body
               }}
-              placeholderStyle={{ color: colors.muted }}
               required
             />
 
@@ -153,7 +147,6 @@ export default function LoginPage() {
                 ...styles.buttonBorder,
                 backgroundColor: colors.accent, 
                 color: colors.white,
-                fontFamily: typography.display,
                 ...styles.displayHeader
               }}
             >

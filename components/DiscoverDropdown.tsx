@@ -122,7 +122,6 @@ export function DiscoverDropdown({ role, className = "" }: DiscoverDropdownProps
                     <div 
                       className="text-sm font-semibold transition-colors"
                       style={{ 
-                        fontFamily: typography.display,
                         ...styles.displayHeader,
                         color: colors.white
                       }}

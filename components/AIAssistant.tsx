@@ -113,7 +113,7 @@ export default function AIAssistant({ isOpen, onClose, context }: AIAssistantPro
           p.content_type === 'training_clip'
         ).slice(0, 5) || [],
         recentActions: postsRes.data?.map(p => p.action_type).filter((action: any) => Boolean(action)).slice(0, 5) || [],
-        competitions: [...new Set(postsRes.data?.map(p => p.competition).filter((comp: any) => Boolean(comp)))] || []
+        competitions: Array.from(new Set(postsRes.data?.map(p => p.competition).filter((comp: any) => Boolean(comp)) || []))
       }
 
       console.log("🔍 Setting player context:", newContext)
@@ -349,7 +349,7 @@ export default function AIAssistant({ isOpen, onClose, context }: AIAssistantPro
                 <p 
                   style={{ 
                     fontFamily: typography.family,
-                    fontSize: typography.body.max,
+                    fontSize: typography.body,
                     lineHeight: 1.5
                   }}
                 >
@@ -463,7 +463,7 @@ export default function AIAssistant({ isOpen, onClose, context }: AIAssistantPro
               className="flex-1 px-4 py-3 bg-transparent border-0 outline-none text-white placeholder-gray-500"
               style={{ 
                 fontFamily: typography.family,
-                fontSize: typography.body.max
+                fontSize: typography.body
               }}
             />
             <button

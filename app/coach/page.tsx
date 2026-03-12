@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { colors, typography, borderRadius, glassPanel, gradient, pitchGrid } from "../../lib/design/tokens";
+import AppLayout from "../../components/AppLayout";
 
 interface Evaluation {
   playerId: string;
@@ -106,7 +107,7 @@ export default function CoachDashboard() {
     { label: "Mental", value: criteria.mental }
   ];
 
-  const createRadarPath = (data: typeof createRadarData) => {
+  const createRadarPath = (data: ReturnType<typeof createRadarData>) => {
     const angleStep = (Math.PI * 2) / data.length;
     const points = data.map((item, index) => {
       const angle = angleStep * index - Math.PI / 2;
@@ -154,7 +155,7 @@ export default function CoachDashboard() {
                 style={{ 
                   fontFamily: typography.family,
                   color: colors.muted,
-                  fontSize: typography.body.max
+                  fontSize: typography.body
                 }}
               >
                 Evaluate and track player performance with advanced analytics

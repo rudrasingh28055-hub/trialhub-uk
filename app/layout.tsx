@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { Inter, Manrope } from "next/font/google";
-import "./globals.css";
-import { colors } from "../lib/design/tokens";
-import AIAssistant from "@/components/AIAssistant";
+import { Inter, Manrope } from 'next/font/google';
+import './globals.css';
+import { colors } from '../lib/design/tokens';
+import AIAssistantClient from '@/components/AIAssistantClient';
 
 const inter = Inter({
   subsets: ["latin"],
@@ -13,11 +13,6 @@ const manrope = Manrope({
   subsets: ["latin"],
   variable: "--font-manrope",
 });
-
-export const metadata: Metadata = {
-  title: "Debut",
-  description: "Your stage is ready",
-};
 
 export default function RootLayout({
   children,
@@ -31,7 +26,7 @@ export default function RootLayout({
       </head>
       <body className="font-sans antialiased" style={{ backgroundColor: colors.obsidian, color: colors.white }}>
         {children}
-        <AIAssistant />
+        <AIAssistantClient />
       </body>
     </html>
   );

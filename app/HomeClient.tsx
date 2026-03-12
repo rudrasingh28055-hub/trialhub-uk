@@ -70,36 +70,44 @@ export default function HomeClient({ opportunities, user, role, displayName }: H
   const { scrollYProgress } = useScroll();
   const backgroundY = useTransform(scrollYProgress, [0, 1], [0, 50]);
 
-  const heroRef = useInView({ once: true, margin: "-100px" });
-  const welcomeRef = useInView({ once: true, margin: "-100px" });
-  const footballRef = useInView({ once: true, margin: "-100px" });
-  const ctaRef = useInView({ once: true, margin: "-100px" });
+  const heroRef = useRef(null);
+  const welcomeRef = useRef(null);
+  const footballRef = useRef(null);
+  const ctaRef = useRef(null);
+
+  const heroInView = useInView(heroRef, { once: true, margin: "-100px" });
+  const welcomeInView = useInView(welcomeRef, { once: true, margin: "-100px" });
+  const footballInView = useInView(footballRef, { once: true, margin: "-100px" });
+  const ctaInView = useInView(ctaRef, { once: true, margin: "-100px" });
 
   const formatKickoff = (dateString: string) => {
-  const date = new Date(dateString)
-  const now = new Date()
-  const tomorrow = new Date(now)
-  tomorrow.setDate(tomorrow.getDate() + 1)
-  
-  const timeStr = date.toLocaleTimeString('en-GB', { 
-    hour: '2-digit', 
-    minute: '2-digit',
-    timeZone: 'Europe/London'
-  })
-  
-  if (date.toDateString() === now.toDateString()) {
-    return `Today ${timeStr}` 
-  } else if (date.toDateString() === tomorrow.toDateString()) {
-    return `Tomorrow ${timeStr}` 
-  } else {
-    return date.toLocaleDateString('en-GB', { 
-      weekday: 'short', 
-      day: 'numeric', 
-      month: 'short',
+    const date = new Date(dateString)
+    const now = new Date()
+    const tomorrow = new Date(now)
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    
+    const timeStr = date.toLocaleTimeString('en-GB', { 
+      hour: '2-digit', 
+      minute: '2-digit',
       timeZone: 'Europe/London'
-    }) + ` ${timeStr}` 
+    })
+    
+    if (date.toDateString() === now.toDateString()) {
+      return `Today ${timeStr}` 
+    } else if (date.toDateString() === tomorrow.toDateString()) {
+      return `Tomorrow ${timeStr}`
+    } else {
+      return date.toLocaleDateString('en-GB', { 
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric'
+      }) + ` ${timeStr}`
+    }
   }
-};
+
+  const fetchLiveData = async () => {
+    // Implementation will go here
+  }
 
   const fetchLiveScores = async () => {
     // Check cache (55 seconds)
@@ -648,7 +656,7 @@ export default function HomeClient({ opportunities, user, role, displayName }: H
                                   color: "white",
                                   fontSize: "14px"
                                 }}>
-                                  {formatKickoff(match.utcDate)}
+                                  {match.utcDate ? formatKickoff(match.utcDate) : 'Time TBD'}
                                 </span>
                               </div>
                             </div>

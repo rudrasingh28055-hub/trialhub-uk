@@ -31,7 +31,6 @@ export default function PageHeader({
               <span 
                 className="text-xs font-bold uppercase tracking-[0.2em]"
                 style={{ 
-                  fontFamily: typography.display,
                   ...styles.displayHeader,
                   color: colors.accent
                 }}
@@ -43,7 +42,6 @@ export default function PageHeader({
           <h1 
             className="text-4xl font-black tracking-[-0.03em] md:text-5xl"
             style={{ 
-              fontFamily: typography.display,
               ...styles.displayHeader,
               color: colors.white
             }}
