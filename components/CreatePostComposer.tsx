@@ -853,7 +853,8 @@ const videoDurationRef = useRef<number>(47); // Default fallback duration
     if (composer.placingKeyframe === "start") setSpotlightStartPoint(x, y);
     if (composer.placingKeyframe === "mid") setSpotlightMidPoint(x, y);
     if (composer.placingKeyframe === "end") setSpotlightEndPoint(x, y);
-    setComposer(prev => ({ ...prev, placingKeyframe: undefined }));
+    // Reopen edit sheet after placement so user can place next keyframe
+    setComposer(prev => ({ ...prev, placingKeyframe: undefined, showEditSheet: true }));
   };
 
   // Publish
@@ -1385,11 +1386,24 @@ const videoDurationRef = useRef<number>(47); // Default fallback duration
                       {/* Video Preview */}
                       <div className="mb-6">
                         {composer.highlight.muxPlaybackId ? (
-  <div style={{ position: 'relative', width: '100%', height: '300px', borderRadius: '16px', overflow: 'hidden' }}>
+  <div
+    style={{ position: 'relative', width: '100%', height: '300px', borderRadius: '16px', overflow: 'hidden', cursor: composer.placingKeyframe ? 'crosshair' : 'default' }}
+    onClick={handleVideoAreaClick}
+  >
+    {composer.placingKeyframe && (
+      <div style={{
+        position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)',
+        background: 'rgba(124,58,237,0.9)', color: 'white', fontSize: 12,
+        padding: '4px 12px', borderRadius: 999, zIndex: 30, pointerEvents: 'none',
+        whiteSpace: 'nowrap'
+      }}>
+        Click to place <strong>{composer.placingKeyframe}</strong> point
+      </div>
+    )}
     <MuxPlayer
       playbackId={composer.highlight.muxPlaybackId}
-      style={{ 
-        width: '100%', 
+      style={{
+        width: '100%',
         height: '300px',
         borderRadius: '16px'
       }}
@@ -1408,6 +1422,10 @@ const videoDurationRef = useRef<number>(47); // Default fallback duration
           videoDurationRef.current = duration
           updateHighlight({ duration: duration })
         }
+      }}
+      onTimeUpdate={(evt: any) => {
+        const time = evt?.target?.currentTime ?? evt?.detail?.currentTime ?? 0
+        if (time > 0) updateHighlight({ currentTime: time })
       }}
     />
     {/* Spotlight overlay for Mux videos */}
@@ -2282,8 +2300,11 @@ const videoDurationRef = useRef<number>(47); // Default fallback duration
                           <div className="text-2xl mb-2">🎯</div>
                           Click "Place Start Point" to begin
                         </div>
-                        <button 
-                          onClick={() => setSpotlightStartPoint(50, 50)} 
+                        <button
+                          onClick={() => {
+                            setSpotlightStartPoint(50, 50)
+                            setComposer(prev => ({ ...prev, placingKeyframe: 'start', showEditSheet: false }))
+                          }}
                           className="w-full mt-3 px-4 py-3 font-medium transition-all"
                           style={{ 
                             ...styles.displayHeader, 
@@ -2324,9 +2345,9 @@ const videoDurationRef = useRef<number>(47); // Default fallback duration
                           </label>
                           <div className="grid grid-cols-3 gap-2">
                             {(["start", "mid", "end"] as const).map(kid => (
-                              <button 
-                                key={kid} 
-                                onClick={() => setComposer(prev => ({ ...prev, placingKeyframe: kid }))} 
+                              <button
+                                key={kid}
+                                onClick={() => setComposer(prev => ({ ...prev, placingKeyframe: kid, showEditSheet: false }))}
                                 className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
                                   composer.placingKeyframe === kid ? "" : ""
                                 }`}
