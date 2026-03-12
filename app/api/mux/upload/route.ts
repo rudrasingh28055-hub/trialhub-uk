@@ -21,7 +21,7 @@ export async function POST(request: Request) {
       tokenSecret
     })
 
-    const { action, uploadId } = await request.json()
+    const { action, uploadId, assetId } = await request.json()
     console.log('Mux action:', action)
 
     if (action === 'create-upload') {
@@ -74,6 +74,36 @@ export async function POST(request: Request) {
         return NextResponse.json({ status: upload.status })
       } catch (muxError: any) {
         console.error('Mux status check error:', muxError?.message)
+        return NextResponse.json({ error: muxError?.message })
+      }
+    }
+
+    // Enable capped-1080p MP4 on an existing asset (for TwelveLabs compatibility)
+    if (action === 'ensure-mp4' && assetId) {
+      try {
+        const credentials = Buffer.from(`${tokenId}:${tokenSecret}`).toString('base64')
+        await fetch(`https://api.mux.com/video/v1/assets/${assetId}/mp4-support`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Basic ${credentials}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ standard: 'capped-1080p' })
+        })
+        return NextResponse.json({ ok: true })
+      } catch (muxError: any) {
+        return NextResponse.json({ error: muxError?.message })
+      }
+    }
+
+    // Check whether static renditions (MP4) are ready on an asset
+    if (action === 'mp4-status' && assetId) {
+      try {
+        const asset = await mux.video.assets.retrieve(assetId)
+        return NextResponse.json({
+          mp4Status: (asset as any).static_renditions?.status ?? 'disabled'
+        })
+      } catch (muxError: any) {
         return NextResponse.json({ error: muxError?.message })
       }
     }

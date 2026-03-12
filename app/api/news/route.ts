@@ -7,14 +7,7 @@ export async function GET() {
   }
   
   try {
-    const queries = [
-      'Premier League transfer',
-      'La Liga transfer signing',
-      'Arsenal Chelsea Liverpool ManCity ManUnited transfer',
-      'Real Madrid Barcelona transfer'
-    ].join(' OR ')
-
-    const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(queries)}&sortBy=publishedAt&language=en&pageSize=10&apiKey=${apiKey}` 
+    const url = `https://newsapi.org/v2/everything?q=football+transfer+OR+Premier+League+OR+Champions+League&sortBy=publishedAt&language=en&pageSize=20&apiKey=${apiKey}`
 
     const res = await fetch(url)
     const data = await res.json()
@@ -25,9 +18,13 @@ export async function GET() {
         (article.description || '')
       ).toLowerCase()
       
-      const isFootball = 
+      const isFootball =
         text.includes('premier league') ||
         text.includes('la liga') ||
+        text.includes('bundesliga') ||
+        text.includes('serie a') ||
+        text.includes('ligue 1') ||
+        text.includes('champions league') ||
         text.includes('transfer') ||
         text.includes('arsenal') ||
         text.includes('chelsea') ||
@@ -37,9 +34,20 @@ export async function GET() {
         text.includes('barcelona') ||
         text.includes('atletico') ||
         text.includes('tottenham') ||
+        text.includes('juventus') ||
+        text.includes('ac milan') ||
+        text.includes('inter milan') ||
+        text.includes('psg') ||
         text.includes('signing') ||
         text.includes('loan move') ||
-        text.includes('contract')
+        text.includes('contract') ||
+        text.includes('footballer') ||
+        text.includes(' fc ') ||
+        text.includes('match') ||
+        text.includes('goal') ||
+        text.includes('manager') ||
+        text.includes('sacked') ||
+        text.includes('appointed')
       
       const isOtherSport = 
         text.includes('nba') ||

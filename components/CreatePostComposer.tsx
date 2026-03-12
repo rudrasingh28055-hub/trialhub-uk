@@ -636,26 +636,55 @@ const videoDurationRef = useRef<number>(47); // Default fallback duration
   const analyseWithAI = async () => {
     setHasClickedAI(true)
     setAiAnalysing(true)
-    setAiStep('AI is watching your clip...')
+    setAiStep('Checking video...')
     
-    // Get video URL for Twelve Labs
-    // Prefer capped-1080p MP4 (requires mp4_support enabled on asset),
-    // fall back to HLS which is always available once the asset is ready
+    // Ensure the Mux asset has MP4 support enabled (required for TwelveLabs)
+    if (composer.highlight.muxAssetId) {
+      setAiStep('Preparing video for AI...')
+      await fetch('/api/mux/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'ensure-mp4', assetId: composer.highlight.muxAssetId })
+      })
+
+      // Poll until static renditions are ready (max ~2 min)
+      let mp4Ready = false
+      for (let i = 0; i < 24; i++) {
+        await new Promise(r => setTimeout(r, 5000))
+        const r = await fetch('/api/mux/upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'mp4-status', assetId: composer.highlight.muxAssetId })
+        })
+        const { mp4Status } = await r.json()
+        if (mp4Status === 'ready') { mp4Ready = true; break }
+      }
+
+      if (!mp4Ready) {
+        setAiError('Video MP4 not ready. Please try again in a moment.')
+        setAiAnalysing(false)
+        setAiStep('')
+        return
+      }
+    }
+
+    // Get video URL for Twelve Labs (capped-1080p MP4)
     let videoUrl = ''
     if (composer.highlight.muxPlaybackId) {
       videoUrl = `https://stream.mux.com/${composer.highlight.muxPlaybackId}/capped-1080p.mp4`
     } else if (composer.localPreviewUrl) {
       videoUrl = composer.localPreviewUrl
     }
-    
+
     if (!videoUrl) {
       setAiError('No video URL available for AI analysis')
       setAiAnalysing(false)
       setAiStep('')
       return
     }
-    
+
     try {
+      setAiStep('AI is watching your clip...')
       const indexRes = await fetch('/api/twelvelabs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
