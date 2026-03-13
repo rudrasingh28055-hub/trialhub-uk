@@ -1,0 +1,2 @@
+{"sessionId":"dfce06","runId":"pre-fix","hypothesisId":"nav-auth-2","location":"components/Navbar.tsx:onAuthStateChange:profile-data","message":"Navbar loaded profile data","data":{"hasProfile":true,"role":"athlete","fullNamePresent":true},"timestamp":1773330219056}
+{"sessionId":"dfce06","runId":"pre-fix","hypothesisId":"nav-auth-2","location":"components/Navbar.tsx:onAuthStateChange:profile-data","message":"Navbar loaded profile data","data":{"hasProfile":true,"role":"athlete","fullNamePresent":true},"timestamp":1773330243490}
