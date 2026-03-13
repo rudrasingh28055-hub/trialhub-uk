@@ -107,7 +107,7 @@ export default function Navbar() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 md:px-6">
           <Link href="/" className="group flex items-center gap-3">
             <div className="relative flex h-12 w-12 items-center justify-center" style={{ ...styles.buttonBorder, backgroundColor: colors.accent }}>
-              <span className="text-base font-black text-white">A</span>
+              <span className="text-base font-black text-white">D</span>
             </div>
 
             <div className="min-w-0">
@@ -115,7 +115,7 @@ export default function Navbar() {
                 Debut
               </div>
               <div className="hidden text-sm md:block" style={{ color: colors.muted }}>
-                Your stage is ready
+                debut.football
               </div>
             </div>
           </Link>
@@ -156,7 +156,7 @@ export default function Navbar() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 md:px-6">
           <Link href="/" className="group flex items-center gap-3">
             <div className="relative flex h-12 w-12 items-center justify-center" style={{ ...styles.buttonBorder, backgroundColor: colors.accent }}>
-              <span className="text-base font-black text-white">A</span>
+              <span className="text-base font-black text-white">D</span>
             </div>
 
             <div className="min-w-0">
@@ -164,7 +164,7 @@ export default function Navbar() {
                 Debut
               </div>
               <div className="hidden text-sm md:block" style={{ color: colors.muted }}>
-                Your stage is ready
+                debut.football
               </div>
             </div>
           </Link>
@@ -229,9 +229,10 @@ export default function Navbar() {
                         : ""
                     }`}
                     style={{
-                      backgroundColor: active ? colors.accent : "transparent",
-                      color: active ? colors.white : colors.muted,
-                      border: active ? `1px solid ${colors.accent}` : `1px solid ${colors.surface}`
+                      backgroundColor: active ? 'rgba(124,58,237,0.12)' : "transparent",
+                      color: active ? '#F8FAFC' : colors.muted,
+                      border: active ? '1px solid rgba(124,58,237,0.3)' : `1px solid ${colors.surface}`,
+                      borderRadius: active ? 8 : undefined
                     }}
                   >
                     {item.label}

@@ -1,10 +1,9 @@
 import Navbar from "@/components/Navbar";
-import PageHeader from "@/components/layout/PageHeader";
 import { FeedContainer } from "@/components/feed/FeedContainer";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { colors, typography, styles, borderRadius } from "@/lib/design/tokens";
+import { colors } from "@/lib/design/tokens";
 
 export default async function FeedPage() {
   const supabase = await createClient();
@@ -35,35 +34,31 @@ export default async function FeedPage() {
     <main className="min-h-screen" style={{ backgroundColor: colors.black }}>
       <Navbar />
 
-      <section className="relative mx-auto max-w-7xl px-6 py-12">
+      <section className="relative mx-auto max-w-7xl px-6 py-8 pt-10">
         <div className="relative">
           <div className="flex items-center justify-between">
-            <PageHeader
-              eyebrow="DISCOVERY"
-              title="FEED"
-              subtitle={userRole === 'club' 
-                ? "Discover talent through player highlights and achievements"
-                : "Share your highlights and discover other players"
-              }
-              centered={false}
-            />
-            
+            <div>
+              <p style={{ color: '#7C3AED', fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 8, fontFamily: 'Inter, sans-serif' }}>DISCOVERY</p>
+              <h1 style={{ color: '#F8FAFC', fontFamily: "'Satoshi', sans-serif", fontWeight: 800, fontSize: 32, letterSpacing: '-0.02em', margin: 0 }}>Feed</h1>
+            </div>
+
             {/* Create Post Button */}
             <Link
               href="/post/create"
-              className="flex items-center gap-2 transition-all"
               style={{
-                backgroundColor: colors.accent,
-                color: colors.white,
-                padding: "12px 24px",
-                fontSize: "14px",
-                ...styles.displayHeader
+                display: 'inline-flex', alignItems: 'center', gap: 8,
+                backgroundColor: '#7C3AED', color: 'white',
+                padding: '10px 20px', borderRadius: 10,
+                fontSize: 13, fontWeight: 700,
+                fontFamily: "'Satoshi', sans-serif",
+                textDecoration: 'none', letterSpacing: '-0.01em',
+                transition: 'opacity 0.15s'
               }}
             >
-              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
               </svg>
-              CREATE POST
+              New post
             </Link>
           </div>
 

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { motion, useScroll, useTransform, useInView } from "framer-motion";
+import { motion } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
 import { colors, typography, borderRadius } from "@/lib/design/tokens";
 
@@ -67,18 +67,9 @@ export default function HomeClient({ opportunities, user, role, displayName }: H
   const cachedLiveData = useRef<Match[]>([]);
   const cachedUpcomingData = useRef<Match[]>([]);
 
-  const { scrollYProgress } = useScroll();
-  const backgroundY = useTransform(scrollYProgress, [0, 1], [0, 50]);
-
   const heroRef = useRef(null);
   const welcomeRef = useRef(null);
   const footballRef = useRef(null);
-  const ctaRef = useRef(null);
-
-  const heroInView = useInView(heroRef, { once: true, margin: "-100px" });
-  const welcomeInView = useInView(welcomeRef, { once: true, margin: "-100px" });
-  const footballInView = useInView(footballRef, { once: true, margin: "-100px" });
-  const ctaInView = useInView(ctaRef, { once: true, margin: "-100px" });
 
   const formatKickoff = (dateString: string) => {
     const date = new Date(dateString)
@@ -252,12 +243,12 @@ export default function HomeClient({ opportunities, user, role, displayName }: H
   }, []);
 
   const GlassCard = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-    <div 
-      className={`backdrop-blur-2xl ${className}`}
+    <div
+      className={className}
       style={{
-        background: "rgba(255,255,255,0.04)",
-        border: "1px solid rgba(255,255,255,0.08)",
-        boxShadow: "0 4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08)",
+        background: "#111118",
+        border: "1px solid rgba(255,255,255,0.07)",
+        boxShadow: "0 4px 24px rgba(0,0,0,0.4)",
         borderRadius: "20px"
       }}
     >
@@ -267,56 +258,29 @@ export default function HomeClient({ opportunities, user, role, displayName }: H
 
   return (
     <AppLayout>
-      <div className="relative overflow-hidden" style={{ background: "#080810" }}>
-        {/* Animated Background */}
-        <motion.div 
-          className="absolute inset-0"
-          style={{ y: backgroundY }}
-        >
-          {/* Gradient Orbs */}
-          <motion.div
-            animate={{ 
-              transform: ["translate(0,0)", "translate(20px, 20px)"]
-            }}
-            transition={{ duration: 8, ease: "easeInOut", repeat: Infinity, repeatType: "reverse" }}
-            className="absolute top-20 left-20 w-96 h-96 rounded-full pointer-events-none"
-            style={{
-              background: "#7C3AED",
-              opacity: 0.15,
-              filter: "blur(120px)"
-            }}
-          />
-          <motion.div
-            animate={{ 
-              transform: ["translate(0,0)", "translate(-20px, -20px)"]
-            }}
-            transition={{ duration: 8, ease: "easeInOut", repeat: Infinity, repeatType: "reverse" }}
-            className="absolute bottom-20 right-20 w-96 h-96 rounded-full pointer-events-none"
-            style={{
-              background: "#2563EB",
-              opacity: 0.1,
-              filter: "blur(120px)"
-            }}
-          />
-        </motion.div>
+      <div className="relative overflow-hidden" style={{ background: "#0B0B0F" }}>
 
         {/* HERO SECTION */}
-        <motion.section 
+        <motion.section
           ref={heroRef}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           className="relative min-h-screen flex items-center justify-center px-6"
-          style={{ paddingTop: "96px", paddingBottom: "96px" }}
+          style={{
+            paddingTop: "96px",
+            paddingBottom: "96px",
+            background: "radial-gradient(ellipse at 60% 0%, rgba(124,58,237,0.15) 0%, transparent 60%)"
+          }}
         >
           <div className="text-center max-w-4xl mx-auto">
-            <motion.h1 
+            <motion.h1
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, delay: 0.2 }}
               className="text-white mb-6"
-              style={{ 
-                fontSize: "96px", 
+              style={{
+                fontSize: "96px",
                 fontFamily: "'Satoshi', sans-serif",
                 fontWeight: 900,
                 letterSpacing: "-0.04em"
@@ -324,13 +288,13 @@ export default function HomeClient({ opportunities, user, role, displayName }: H
             >
               DEBUT
             </motion.h1>
-            
-            <motion.p 
+
+            <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="mb-12 mx-auto"
-              style={{ 
+              className="mb-10 mx-auto"
+              style={{
                 fontSize: "18px",
                 maxWidth: "480px",
                 color: "rgba(255,255,255,0.5)",
@@ -340,8 +304,37 @@ export default function HomeClient({ opportunities, user, role, displayName }: H
             >
               Where football talent gets discovered
             </motion.p>
-            
-            <motion.div 
+
+            {/* Stat strip */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
+              className="flex justify-center items-center mb-12 mx-auto"
+              style={{ maxWidth: "480px" }}
+            >
+              {[
+                { number: "2,400+", label: "Athletes" },
+                { number: "180+", label: "Clubs" },
+                { number: "45", label: "Countries" }
+              ].map((stat, i) => (
+                <div key={stat.label} className="flex items-center">
+                  {i > 0 && (
+                    <div style={{ width: "1px", height: "32px", background: "rgba(255,255,255,0.1)", margin: "0 24px" }} />
+                  )}
+                  <div className="text-center">
+                    <div style={{ fontSize: "20px", fontFamily: "'Satoshi', sans-serif", fontWeight: 700, color: "#F8FAFC" }}>
+                      {stat.number}
+                    </div>
+                    <div style={{ fontSize: "12px", fontFamily: "Inter, sans-serif", color: "rgba(255,255,255,0.45)" }}>
+                      {stat.label}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </motion.div>
+
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.6 }}
@@ -390,20 +383,28 @@ export default function HomeClient({ opportunities, user, role, displayName }: H
 
         {/* PERSONALIZED WELCOME SECTION */}
         {user && (
-          <motion.section 
+          <motion.section
             ref={welcomeRef}
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             className="relative px-6"
-            style={{ paddingTop: "96px", paddingBottom: "96px" }}
+            style={{ paddingTop: "64px", paddingBottom: "64px" }}
           >
             <div className="max-w-2xl mx-auto">
-              <GlassCard className="p-6 text-center">
+              <div
+                style={{
+                  background: "#111118",
+                  border: "1px solid rgba(255,255,255,0.07)",
+                  borderRadius: "16px",
+                  padding: "28px",
+                  textAlign: "center"
+                }}
+              >
                 <h2 className="text-3xl font-bold text-white mb-2" style={{ fontFamily: "'Satoshi', sans-serif", letterSpacing: "-0.02em" }}>
                   Welcome back, <span style={{ color: "#7C3AED" }}>{displayName || user.email}</span>
                 </h2>
-                
+
                 {role && (
                   <div className="inline-flex items-center px-4 py-2 rounded-full mb-6" style={{ background: "rgba(124,58,237,0.2)" }}>
                     <span className="text-sm font-bold uppercase tracking-wider text-white" style={{ fontFamily: "'Satoshi', sans-serif" }}>
@@ -411,30 +412,30 @@ export default function HomeClient({ opportunities, user, role, displayName }: H
                     </span>
                   </div>
                 )}
-                
+
                 <div className="flex justify-center gap-8 mb-6">
                   <div className="text-center">
                     <div className="text-5xl font-bold text-white" style={{ fontFamily: "'Satoshi', sans-serif" }}>12</div>
-                    <div className="text-sm" style={{ color: "rgba(255,255,255,0.7)", fontFamily: "Inter, sans-serif" }}>Posts</div>
+                    <div className="text-sm" style={{ color: "rgba(255,255,255,0.45)", fontFamily: "Inter, sans-serif" }}>Posts</div>
                   </div>
                   <div className="text-center">
                     <div className="text-5xl font-bold text-white" style={{ fontFamily: "'Satoshi', sans-serif" }}>1.2K</div>
-                    <div className="text-sm" style={{ color: "rgba(255,255,255,0.7)", fontFamily: "Inter, sans-serif" }}>Profile Views</div>
+                    <div className="text-sm" style={{ color: "rgba(255,255,255,0.45)", fontFamily: "Inter, sans-serif" }}>Profile Views</div>
                   </div>
                   <div className="text-center">
                     <div className="text-5xl font-bold text-white" style={{ fontFamily: "'Satoshi', sans-serif" }}>8</div>
-                    <div className="text-sm" style={{ color: "rgba(255,255,255,0.7)", fontFamily: "Inter, sans-serif" }}>Scout Interest</div>
+                    <div className="text-sm" style={{ color: "rgba(255,255,255,0.45)", fontFamily: "Inter, sans-serif" }}>Scout Interest</div>
                   </div>
                 </div>
-                
+
                 <Link
                   href="/feed"
                   className="inline-flex items-center text-white font-medium transition-all duration-150 ease hover:translate-y-[-1px] active:translate-y-0"
                   style={{ fontFamily: "'Satoshi', sans-serif" }}
                 >
-                  Continue your journey →
+                  Continue →
                 </Link>
-              </GlassCard>
+              </div>
             </div>
           </motion.section>
         )}
@@ -449,19 +450,27 @@ export default function HomeClient({ opportunities, user, role, displayName }: H
           style={{ paddingTop: "96px", paddingBottom: "96px" }}
         >
           <div className="max-w-7xl mx-auto">
-            <motion.h2 
+            <motion.h2
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="text-5xl font-bold text-white text-center mb-12"
-              style={{ fontFamily: "'Satoshi', sans-serif", fontWeight: 800, letterSpacing: "-0.02em" }}
+              className="text-white text-center mb-12"
+              style={{ fontSize: "40px", fontFamily: "'Satoshi', sans-serif", fontWeight: 800, letterSpacing: "-0.02em" }}
             >
               What's Happening
             </motion.h2>
 
             {/* Tabs */}
             <div className="flex justify-center mb-8">
-              <div className="inline-flex p-1 rounded-full" style={{ background: "rgba(255, 255, 255, 0.1)" }}>
+              <div
+                className="inline-flex p-1"
+                style={{
+                  background: "rgba(255,255,255,0.06)",
+                  border: "1px solid rgba(255,255,255,0.07)",
+                  borderRadius: "12px",
+                  padding: "4px"
+                }}
+              >
                 {[
                   { key: "live", label: "LIVE SCORES" },
                   { key: "upcoming", label: "UPCOMING" },
@@ -470,11 +479,12 @@ export default function HomeClient({ opportunities, user, role, displayName }: H
                   <motion.button
                     key={tab.key}
                     onClick={() => setActiveTab(tab.key as any)}
-                    className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-150 ease hover:opacity-100 ${
+                    className={`px-6 py-2 text-sm font-medium transition-all duration-150 ease hover:opacity-100 ${
                       activeTab === tab.key ? "text-white" : "text-gray-400"
                     }`}
                     style={{
                       background: activeTab === tab.key ? "#7C3AED" : "transparent",
+                      borderRadius: "8px",
                       fontFamily: "'Satoshi', sans-serif",
                       fontWeight: 700,
                       opacity: activeTab === tab.key ? 1 : 0.6
@@ -523,8 +533,8 @@ export default function HomeClient({ opportunities, user, role, displayName }: H
                             const isFinished = match.status === "FT";
                             
                             return (
-                              <div key={match.id} className="p-4 transition-all duration-200 ease hover:translate-y-[-2px]" style={{ 
-                                background: "rgba(255,255,255,0.04)",
+                              <div key={match.id} className="p-4 transition-all duration-200 ease hover:translate-y-[-2px]" style={{
+                                background: "rgba(255,255,255,0.03)",
                                 border: "1px solid rgba(255,255,255,0.06)",
                                 borderRadius: "12px"
                               }}>
@@ -611,8 +621,8 @@ export default function HomeClient({ opportunities, user, role, displayName }: H
                           </div>
                         ) : (
                           upcomingMatches.map((match) => (
-                            <div key={match.id} className="p-4 transition-all duration-200 ease hover:translate-y-[-2px]" style={{ 
-                              background: "rgba(255,255,255,0.04)",
+                            <div key={match.id} className="p-4 transition-all duration-200 ease hover:translate-y-[-2px]" style={{
+                              background: "rgba(255,255,255,0.03)",
                               border: "1px solid rgba(255,255,255,0.06)",
                               borderRadius: "12px"
                             }}>
@@ -673,7 +683,7 @@ export default function HomeClient({ opportunities, user, role, displayName }: H
                       {transferNews.length === 0 ? (
                         <div className="space-y-4">
                           {[1, 2, 3, 4].map((i) => (
-                            <div key={i} className="p-4 rounded-lg" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                            <div key={i} className="p-4 rounded-lg" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
                               <h3 className="text-white font-medium mb-2" style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "18px", fontWeight: 700 }}>
                                 Add NEWS_API_KEY to .env.local for live transfer news
                               </h3>
@@ -698,7 +708,7 @@ export default function HomeClient({ opportunities, user, role, displayName }: H
                               whileHover={{ x: 8 }}
                               whileTap={{ scale: 0.98 }}
                               className="p-4 rounded-lg cursor-pointer transition-all duration-200 ease hover:translate-y-[-2px]"
-                              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
+                              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
                               onClick={() => window.open(article.url, '_blank')}
                             >
                               <h3 className="text-white font-medium mb-2" style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "18px", fontWeight: 700 }}>
@@ -730,43 +740,51 @@ export default function HomeClient({ opportunities, user, role, displayName }: H
         </motion.section>
 
         {/* CALL TO ACTION SECTION */}
-        <motion.section 
-          ref={ctaRef}
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="relative px-6"
-          style={{ paddingTop: "96px", paddingBottom: "96px" }}
-        >
-          <div className="max-w-7xl mx-auto">
-            <GlassCard className="p-12 text-center">
-              <h2 className="text-5xl font-bold text-white mb-4" style={{ fontSize: "48px", fontFamily: "'Satoshi', sans-serif", fontWeight: 800, letterSpacing: "-0.02em" }}>
-                Ready for your Debut?
-              </h2>
-              <p className="text-xl mb-8" style={{ color: "rgba(255,255,255,0.7)", fontFamily: "Inter, sans-serif" }}>
-                Join thousands of players getting discovered
-              </p>
-              <motion.div
-                whileHover={{ scale: 1.05, boxShadow: "0 0 32px rgba(124, 58, 237, 0.5)" }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Link
-                  href="/signup"
-                  className="inline-flex items-center px-10 py-4 text-lg font-bold text-white transition-all duration-150 ease hover:translate-y-[-1px] hover:brightness-110 active:translate-y-0 active:scale-98"
-                  style={{
-                    background: "linear-gradient(135deg, #7C3AED, #2563EB)",
-                    borderRadius: "999px",
-                    boxShadow: "0 4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08)",
-                    fontFamily: "'Satoshi', sans-serif",
-                    fontWeight: 700
-                  }}
-                >
-                  Create Your Profile
-                </Link>
-              </motion.div>
-            </GlassCard>
-          </div>
-        </motion.section>
+        {!user && (
+          <section
+            style={{
+              padding: "120px 24px",
+              textAlign: "center",
+              borderTop: "1px solid rgba(255,255,255,0.06)"
+            }}
+          >
+            <h2
+              style={{
+                fontSize: "48px",
+                fontFamily: "'Satoshi', sans-serif",
+                fontWeight: 800,
+                color: "#F8FAFC",
+                letterSpacing: "-0.03em",
+                marginBottom: "16px"
+              }}
+            >
+              Ready to make your debut?
+            </h2>
+            <p
+              style={{
+                color: "rgba(255,255,255,0.45)",
+                fontSize: "16px",
+                fontFamily: "Inter, sans-serif",
+                maxWidth: "440px",
+                margin: "0 auto 40px"
+              }}
+            >
+              Join thousands of athletes and clubs already on the platform.
+            </p>
+            <Link
+              href="/signup"
+              className="inline-flex items-center px-10 py-4 text-lg font-bold text-white transition-all duration-150 ease hover:brightness-110"
+              style={{
+                background: "#7C3AED",
+                borderRadius: "999px",
+                fontFamily: "'Satoshi', sans-serif",
+                fontWeight: 700
+              }}
+            >
+              Get started free →
+            </Link>
+          </section>
+        )}
       </div>
     </AppLayout>
   );
