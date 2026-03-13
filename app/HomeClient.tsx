@@ -55,13 +55,18 @@ interface TransferNews {
 }
 
 export default function HomeClient({ opportunities, user, role, displayName }: HomeClientProps) {
-  const [activeTab, setActiveTab] = useState<"live" | "upcoming" | "transfer">("live");
+  const [activeTab, setActiveTab] = useState<"live" | "upcoming" | "transfer" | "standings">("live");
   const [liveMatches, setLiveMatches] = useState<Match[]>([]);
   const [resultsOnly, setResultsOnly] = useState(false);
   const [upcomingMatches, setUpcomingMatches] = useState<Match[]>([]);
   const [transferNews, setTransferNews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [standings, setStandings] = useState<any[]>([]);
+  const [standingsLeague, setStandingsLeague] = useState('eng.1');
+  const [standingsLoading, setStandingsLoading] = useState(false);
+  // Map of team name -> points for win probability calculation
+  const standingsMap = useRef<Map<string, number>>(new Map());
 
   // Refs for caching to avoid rate limits
   const lastFetchTime = useRef(0);
@@ -228,25 +233,48 @@ export default function HomeClient({ opportunities, user, role, displayName }: H
     }
   };
 
+  const fetchStandings = async (league: string) => {
+    setStandingsLoading(true);
+    try {
+      const res = await fetch(`/api/standings?league=${league}`);
+      const data = await res.json();
+      const rows = data.standings ?? [];
+      setStandings(rows);
+      // Rebuild points map for probability calc (covers all fetched leagues)
+      rows.forEach((r: any) => standingsMap.current.set(r.team.name, r.pts));
+    } catch {
+      setStandings([]);
+    } finally {
+      setStandingsLoading(false);
+    }
+  };
+
+  // Win probability from points; falls back to near-equal if team not found
+  const winProb = (homeName: string, awayName: string) => {
+    const hPts = standingsMap.current.get(homeName) ?? 45;
+    const aPts = standingsMap.current.get(awayName) ?? 45;
+    const hStr = hPts * 1.3; // home advantage
+    const total = hStr + aPts;
+    const draw = 22;
+    const home = Math.round((hStr / total) * (100 - draw));
+    const away = 100 - draw - home;
+    return { home, draw, away };
+  };
+
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
       setError(null);
-      
       await Promise.all([
         fetchLiveScores(),
         fetchUpcomingMatches(),
-        fetchTransferNews()
+        fetchTransferNews(),
+        fetchStandings('eng.1'), // pre-load PL for probability bars
       ]);
-      
       setLoading(false);
     };
-
     loadData();
-    
-    // Auto-refresh live scores every 60 seconds
     const interval = setInterval(fetchLiveScores, 60000);
-    
     return () => clearInterval(interval);
   }, []);
 
@@ -364,6 +392,27 @@ export default function HomeClient({ opportunities, user, role, displayName }: H
             }}>{match.awayTeam.name}</span>
           </div>
         </div>
+
+        {/* Win probability bar — only for upcoming */}
+        {showTime && !hasScore && (() => {
+          const prob = winProb(match.homeTeam.name, match.awayTeam.name)
+          return (
+            <div style={{ marginTop: 14 }}>
+              {/* Bar */}
+              <div style={{ display: 'flex', height: 4, borderRadius: 99, overflow: 'hidden', gap: 2 }}>
+                <div style={{ width: `${prob.home}%`, background: '#7C3AED', borderRadius: '99px 0 0 99px' }} />
+                <div style={{ width: `${prob.draw}%`, background: 'rgba(255,255,255,0.18)' }} />
+                <div style={{ width: `${prob.away}%`, background: '#2563EB', borderRadius: '0 99px 99px 0' }} />
+              </div>
+              {/* Labels */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6 }}>
+                <span style={{ color: '#A78BFA', fontSize: 10, fontFamily: 'Inter, sans-serif', fontWeight: 600 }}>{prob.home}%</span>
+                <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10, fontFamily: 'Inter, sans-serif' }}>Draw {prob.draw}%</span>
+                <span style={{ color: '#60A5FA', fontSize: 10, fontFamily: 'Inter, sans-serif', fontWeight: 600 }}>{prob.away}%</span>
+              </div>
+            </div>
+          )
+        })()}
       </div>
     )
   }
@@ -600,7 +649,8 @@ export default function HomeClient({ opportunities, user, role, displayName }: H
                 {[
                   { key: "live", label: "LIVE SCORES" },
                   { key: "upcoming", label: "UPCOMING" },
-                  { key: "transfer", label: "TRANSFER NEWS" }
+                  { key: "transfer", label: "TRANSFER NEWS" },
+                  { key: "standings", label: "STANDINGS" },
                 ].map((tab) => (
                   <motion.button
                     key={tab.key}
@@ -735,6 +785,120 @@ export default function HomeClient({ opportunities, user, role, displayName }: H
                               )}
                             </div>
                           ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {activeTab === "standings" && (
+                    <div style={{ padding: '16px 0 8px' }}>
+                      {/* League selector */}
+                      <div style={{ display: 'flex', gap: 8, overflowX: 'auto', padding: '0 16px 16px', scrollbarWidth: 'none' }}>
+                        {[
+                          { slug: 'eng.1', label: 'Premier League' },
+                          { slug: 'esp.1', label: 'La Liga' },
+                          { slug: 'ger.1', label: 'Bundesliga' },
+                          { slug: 'ita.1', label: 'Serie A' },
+                          { slug: 'fra.1', label: 'Ligue 1' },
+                        ].map(l => (
+                          <button
+                            key={l.slug}
+                            onClick={() => {
+                              setStandingsLeague(l.slug);
+                              fetchStandings(l.slug);
+                            }}
+                            style={{
+                              flexShrink: 0, padding: '5px 14px', borderRadius: 99, fontSize: 12,
+                              fontFamily: 'Inter, sans-serif', fontWeight: 600, border: 'none',
+                              cursor: 'pointer', whiteSpace: 'nowrap',
+                              background: standingsLeague === l.slug ? '#7C3AED' : 'rgba(255,255,255,0.07)',
+                              color: standingsLeague === l.slug ? '#fff' : 'rgba(255,255,255,0.5)',
+                              transition: 'all 0.15s'
+                            }}
+                          >{l.label}</button>
+                        ))}
+                      </div>
+
+                      {/* Table */}
+                      {standingsLoading ? (
+                        <div style={{ padding: '32px', textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontFamily: 'Inter, sans-serif', fontSize: 13 }}>
+                          Loading…
+                        </div>
+                      ) : (
+                        <div style={{ overflowX: 'auto' }}>
+                          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, fontFamily: 'Inter, sans-serif' }}>
+                            <thead>
+                              <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+                                {['#', 'Club', 'MP', 'W', 'D', 'L', 'GD', 'Pts'].map((h, i) => (
+                                  <th key={h} style={{
+                                    padding: '8px 12px', color: 'rgba(255,255,255,0.35)', fontWeight: 600,
+                                    textAlign: i <= 1 ? 'left' : 'center', whiteSpace: 'nowrap'
+                                  }}>{h}</th>
+                                ))}
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {standings.map((row, i) => {
+                                const pos = row.pos;
+                                const zoneColor =
+                                  pos <= 4 ? 'rgba(37,99,235,0.55)'   // Champions League
+                                  : pos <= 6 ? 'rgba(234,88,12,0.55)'  // Europa
+                                  : pos >= standings.length - 2 ? 'rgba(239,68,68,0.55)' // Relegation
+                                  : 'transparent';
+                                const isHighlighted = pos <= 6 || pos >= standings.length - 2;
+                                return (
+                                  <tr
+                                    key={row.team.name}
+                                    style={{
+                                      borderBottom: '1px solid rgba(255,255,255,0.04)',
+                                      background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.01)',
+                                    }}
+                                  >
+                                    <td style={{ padding: '10px 12px', textAlign: 'left' }}>
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                        <div style={{ width: 3, height: 20, borderRadius: 99, background: zoneColor, flexShrink: 0 }} />
+                                        <span style={{ color: isHighlighted ? '#F8FAFC' : 'rgba(255,255,255,0.45)', fontWeight: 700, fontSize: 12, minWidth: 16, textAlign: 'center' }}>{pos}</span>
+                                      </div>
+                                    </td>
+                                    <td style={{ padding: '10px 8px' }}>
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                        {row.team.logo ? (
+                                          <img src={row.team.logo} alt="" style={{ width: 20, height: 20, objectFit: 'contain' }} />
+                                        ) : (
+                                          <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(124,58,237,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 8, fontWeight: 700, color: 'white' }}>
+                                            {row.team.shortName?.slice(0, 2)}
+                                          </div>
+                                        )}
+                                        <span style={{ color: '#F8FAFC', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 130 }}>
+                                          {row.team.name}
+                                        </span>
+                                      </div>
+                                    </td>
+                                    {[row.mp, row.w, row.d, row.l].map((v, j) => (
+                                      <td key={j} style={{ padding: '10px 12px', textAlign: 'center', color: 'rgba(255,255,255,0.5)' }}>{v}</td>
+                                    ))}
+                                    <td style={{ padding: '10px 12px', textAlign: 'center', color: row.gd > 0 ? '#6EE7B7' : row.gd < 0 ? '#FCA5A5' : 'rgba(255,255,255,0.5)' }}>
+                                      {row.gd > 0 ? `+${row.gd}` : row.gd}
+                                    </td>
+                                    <td style={{ padding: '10px 12px', textAlign: 'center', color: '#F8FAFC', fontWeight: 700 }}>{row.pts}</td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+
+                          {/* Legend */}
+                          <div style={{ display: 'flex', gap: 16, padding: '12px 16px', flexWrap: 'wrap' }}>
+                            {[
+                              { color: 'rgba(37,99,235,0.7)', label: 'Champions League' },
+                              { color: 'rgba(234,88,12,0.7)', label: 'Europa League' },
+                              { color: 'rgba(239,68,68,0.7)', label: 'Relegation' },
+                            ].map(z => (
+                              <div key={z.label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <div style={{ width: 10, height: 10, borderRadius: 2, background: z.color }} />
+                                <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: 11, fontFamily: 'Inter, sans-serif' }}>{z.label}</span>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       )}
                     </div>
