@@ -57,6 +57,7 @@ interface TransferNews {
 export default function HomeClient({ opportunities, user, role, displayName }: HomeClientProps) {
   const [activeTab, setActiveTab] = useState<"live" | "upcoming" | "transfer">("live");
   const [liveMatches, setLiveMatches] = useState<Match[]>([]);
+  const [resultsOnly, setResultsOnly] = useState(false);
   const [upcomingMatches, setUpcomingMatches] = useState<Match[]>([]);
   const [transferNews, setTransferNews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -141,8 +142,9 @@ export default function HomeClient({ opportunities, user, role, displayName }: H
       lastFetchTime.current = now;
       cachedLiveData.current = transformedMatches;
       setLiveMatches(transformedMatches);
-      
-      // Auto-switch to upcoming if no live matches or API returned upcoming as fallback
+      setResultsOnly(!!data.resultsOnly);
+
+      // Auto-switch to upcoming only when truly nothing to show
       if (matches.length === 0 || data.fallback) {
         setActiveTab("upcoming");
       }
@@ -527,79 +529,80 @@ export default function HomeClient({ opportunities, user, role, displayName }: H
                           <p className="text-sm" style={{ fontFamily: "Inter, sans-serif" }}>Check upcoming matches for fixtures</p>
                         </div>
                       ) : (
-                        <div className="space-y-4">
-                          {liveMatches.map((match) => {
-                            const isLive = match.status === "1H" || match.status === "2H" || match.status === "ET" || match.status === "P";
-                            const isFinished = match.status === "FT";
-                            
-                            return (
-                              <div key={match.id} className="p-4 transition-all duration-200 ease hover:translate-y-[-2px]" style={{
-                                background: "rgba(255,255,255,0.03)",
-                                border: "1px solid rgba(255,255,255,0.06)",
-                                borderRadius: "12px"
-                              }}>
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-3 flex-1">
-                                    {match.homeTeam.crest && (
-                                      <img src={match.homeTeam.crest} alt={match.homeTeam.name} className="w-6 h-6" />
-                                    )}
-                                    <p className="font-medium flex-1" style={{ fontFamily: "'Satoshi', sans-serif", color: "white" }}>{match.homeTeam.name}</p>
-                                  </div>
-                                  
-                                  <div className="text-center px-4">
-                                    <div className="flex items-center gap-2 justify-center">
-                                      {isLive && (
-                                        <span style={{
-                                          display: 'inline-block',
-                                          width: 6,
-                                          height: 6,
-                                          borderRadius: '50%',
-                                          background: '#EF4444',
-                                          animation: 'pulse 1.5s ease-in-out infinite'
-                                        }} />
+                        <>
+                          {resultsOnly && (
+                            <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 11, fontFamily: "Inter, sans-serif", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 16 }}>
+                              Today&apos;s Results
+                            </p>
+                          )}
+                          <div className="space-y-4">
+                            {liveMatches.map((match) => {
+                              const isLive = match.status === "1H" || match.status === "2H" || match.status === "ET" || match.status === "P";
+                              const isFinished = match.status === "FT";
+
+                              return (
+                                <div key={match.id} className="p-4 transition-all duration-200 ease hover:translate-y-[-2px]" style={{
+                                  background: "rgba(255,255,255,0.03)",
+                                  border: "1px solid rgba(255,255,255,0.06)",
+                                  borderRadius: "12px"
+                                }}>
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3 flex-1">
+                                      {match.homeTeam.crest && (
+                                        <img src={match.homeTeam.crest} alt={match.homeTeam.name} className="w-6 h-6" />
                                       )}
-                                      <div className="font-bold" style={{ fontSize: "28px", fontFamily: "'Satoshi', sans-serif", color: "white" }}>
-                                        {(isLive || isFinished) && match.score.home !== null
-                                          ? `${match.score.home} - ${match.score.away}`
-                                          : "vs"}
+                                      <p className="font-medium flex-1" style={{ fontFamily: "'Satoshi', sans-serif", color: "white" }}>{match.homeTeam.name}</p>
+                                    </div>
+
+                                    <div className="text-center px-4">
+                                      <div className="flex items-center gap-2 justify-center">
+                                        {isLive && (
+                                          <span style={{
+                                            display: 'inline-block', width: 6, height: 6,
+                                            borderRadius: '50%', background: '#EF4444',
+                                            animation: 'pulse 1.5s ease-in-out infinite'
+                                          }} />
+                                        )}
+                                        <div className="font-bold" style={{ fontSize: "28px", fontFamily: "'Satoshi', sans-serif", color: "white" }}>
+                                          {(isLive || isFinished) && match.score.home !== null
+                                            ? `${match.score.home} - ${match.score.away}`
+                                            : "vs"}
+                                        </div>
+                                      </div>
+                                      <div className="text-sm mt-1" style={{
+                                        color: isLive ? "#EF4444" : "rgba(255,255,255,0.5)",
+                                        fontFamily: "Inter, sans-serif", fontSize: "11px"
+                                      }}>
+                                        {isLive && match.minute ? `${match.minute}' LIVE` : isFinished ? "FT" : ""}
                                       </div>
                                     </div>
-                                    <div className="text-sm mt-1" style={{
-                                      color: isLive ? "#EF4444" : "rgba(255,255,255,0.7)",
-                                      fontFamily: "Inter, sans-serif"
-                                    }}>
-                                      {isLive && match.minute ? `${match.minute}' LIVE` : isFinished ? "FT" : ""}
+
+                                    <div className="flex items-center gap-3 flex-1 justify-end">
+                                      <p className="font-medium flex-1 text-right" style={{ fontFamily: "'Satoshi', sans-serif", color: "white" }}>{match.awayTeam.name}</p>
+                                      {match.awayTeam.crest && (
+                                        <img src={match.awayTeam.crest} alt={match.awayTeam.name} className="w-6 h-6" />
+                                      )}
                                     </div>
                                   </div>
-                                  
-                                  <div className="flex items-center gap-3 flex-1 justify-end">
-                                    <p className="font-medium flex-1 text-right" style={{ fontFamily: "'Satoshi', sans-serif", color: "white" }}>{match.awayTeam.name}</p>
-                                    {match.awayTeam.crest && (
-                                      <img src={match.awayTeam.crest} alt={match.awayTeam.name} className="w-6 h-6" />
-                                    )}
-                                  </div>
+
+                                  {match.competition && (
+                                    <div className="flex items-center gap-2 mt-3 pt-3 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+                                      {match.competition.emblem && (
+                                        <img src={match.competition.emblem} alt={match.competition.name} className="w-4 h-4" />
+                                      )}
+                                      <span style={{
+                                        color: "rgba(124,58,237,0.6)", fontSize: "11px",
+                                        fontFamily: "Inter, sans-serif", textTransform: "uppercase", letterSpacing: "0.05em"
+                                      }}>
+                                        {match.competition.name}
+                                      </span>
+                                    </div>
+                                  )}
                                 </div>
-                                
-                                {match.competition && (
-                                  <div className="flex items-center gap-2 mt-3 pt-3 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-                                    {match.competition.emblem && (
-                                      <img src={match.competition.emblem} alt={match.competition.name} className="w-4 h-4" />
-                                    )}
-                                    <span style={{ 
-                                      color: "rgba(124,58,237,0.6)", 
-                                      fontSize: "11px", 
-                                      fontFamily: "Inter, sans-serif",
-                                      textTransform: "uppercase",
-                                      letterSpacing: "0.05em"
-                                    }}>
-                                      {match.competition.name}
-                                    </span>
-                                  </div>
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
+                              );
+                            })}
+                          </div>
+                        </>
                       )}
                     </div>
                   )}

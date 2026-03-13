@@ -16,7 +16,11 @@ function espnToFixture(event: any, leagueName: string, leagueLogo: string) {
   const away = comp.competitors?.find((c: any) => c.homeAway === 'away')
   const statusName: string = event.status?.type?.name ?? ''
   const isLive = statusName === 'STATUS_IN_PROGRESS' || statusName === 'STATUS_HALFTIME'
-  const isFinal = statusName === 'STATUS_FINAL'
+  const isFinal =
+    statusName === 'STATUS_FINAL' ||
+    statusName === 'STATUS_FULL_TIME' ||
+    statusName === 'STATUS_FINAL_AET' ||
+    statusName === 'STATUS_FINAL_PEN'
 
   return {
     fixture: {
@@ -66,17 +70,29 @@ export async function GET(request: Request) {
     }
 
     if (type === 'live') {
-      const live = allFixtures.filter(f =>
-        f.fixture.status.short === '1H' || f.fixture.status.short === 'FT'
-      )
+      const live = allFixtures.filter(f => f.fixture.status.short === '1H')
       if (live.length > 0) return NextResponse.json({ response: live })
 
-      // No live matches — return next upcoming as fallback
-      const upcoming = allFixtures
-        .filter(f => f.fixture.status.short === 'NS')
-        .sort((a, b) => new Date(a.fixture.date).getTime() - new Date(b.fixture.date).getTime())
-        .slice(0, 3)
-      return NextResponse.json({ response: upcoming, fallback: true })
+      // No live matches — show today's finished results with real scores
+      const todayStart = new Date()
+      todayStart.setUTCHours(0, 0, 0, 0)
+      const todayEnd = new Date()
+      todayEnd.setUTCHours(23, 59, 59, 999)
+
+      const todayResults = allFixtures
+        .filter(f => {
+          if (f.fixture.status.short !== 'FT') return false
+          const d = new Date(f.fixture.date)
+          return d >= todayStart && d <= todayEnd
+        })
+        .sort((a, b) => new Date(b.fixture.date).getTime() - new Date(a.fixture.date).getTime())
+
+      if (todayResults.length > 0) {
+        return NextResponse.json({ response: todayResults, resultsOnly: true })
+      }
+
+      // Nothing today — return empty so client shows "no matches" state
+      return NextResponse.json({ response: [], fallback: true })
     }
 
     if (type === 'upcoming') {
