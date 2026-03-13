@@ -30,8 +30,6 @@ export default function Navbar() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("[Navbar] Auth state change:", event, session?.user?.email);
-      
       if (session?.user) {
         setUserEmail(session.user.email!);
         
@@ -41,33 +39,7 @@ export default function Navbar() {
           
           if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
-            console.error("[Navbar] Profile fetch error:", JSON.stringify({
-              status: response.status,
-              statusText: response.statusText,
-              error: errorData
-            }));
-
-            // #region agent log
-            fetch("http://127.0.0.1:7485/ingest/db6b879b-5d08-4f09-bd87-72e04b66a284", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "X-Debug-Session-Id": "dfce06",
-              },
-              body: JSON.stringify({
-                sessionId: "dfce06",
-                runId: "pre-fix",
-                hypothesisId: "nav-auth-1",
-                location: "components/Navbar.tsx:onAuthStateChange:profile-fetch-error",
-                message: "Navbar profile fetch failed",
-                data: {
-                  status: response.status,
-                  statusText: response.statusText,
-                },
-                timestamp: Date.now(),
-              }),
-            }).catch(() => {});
-            // #endregion agent log
+            console.warn("[Navbar] Profile fetch error:", response.status, response.statusText);
 
             // Fallback to email initial if profile fetch fails
             setDisplayName(session.user.email?.charAt(0).toUpperCase() || "U");
@@ -76,31 +48,6 @@ export default function Navbar() {
           }
           
           const data = await response.json();
-          console.log("[Navbar] Profile data:", data);
-
-          // #region agent log
-          fetch("http://127.0.0.1:7485/ingest/db6b879b-5d08-4f09-bd87-72e04b66a284", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "X-Debug-Session-Id": "dfce06",
-            },
-            body: JSON.stringify({
-              sessionId: "dfce06",
-              runId: "pre-fix",
-              hypothesisId: "nav-auth-2",
-              location: "components/Navbar.tsx:onAuthStateChange:profile-data",
-              message: "Navbar loaded profile data",
-              data: {
-                hasProfile: !!data.profile,
-                role: data.user?.role ?? null,
-                fullNamePresent: !!data.profile?.full_name,
-              },
-              timestamp: Date.now(),
-            }),
-          }).catch(() => {});
-          // #endregion agent log
-          
           // Set display name from profile with fallback to email initial
           const profileName = data.profile?.full_name ?? data.profile?.display_name;
           setDisplayName(profileName || session.user.email?.charAt(0).toUpperCase() || "U");
@@ -109,31 +56,7 @@ export default function Navbar() {
           setRole(data.user?.role as Role);
           
         } catch (error) {
-          console.error("[Navbar] Profile fetch error:", JSON.stringify({
-            message: error instanceof Error ? error.message : String(error),
-            stack: error instanceof Error ? error.stack : undefined
-          }));
-
-          // #region agent log
-          fetch("http://127.0.0.1:7485/ingest/db6b879b-5d08-4f09-bd87-72e04b66a284", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "X-Debug-Session-Id": "dfce06",
-            },
-            body: JSON.stringify({
-              sessionId: "dfce06",
-              runId: "pre-fix",
-              hypothesisId: "nav-auth-3",
-              location: "components/Navbar.tsx:onAuthStateChange:profile-fetch-exception",
-              message: "Navbar profile fetch threw exception",
-              data: {
-                errorMessage: error instanceof Error ? error.message : String(error),
-              },
-              timestamp: Date.now(),
-            }),
-          }).catch(() => {});
-          // #endregion agent log
+          console.warn("[Navbar] Profile fetch error:", error instanceof Error ? error.message : String(error));
           // Fallback to email initial on error
           setDisplayName(session.user.email?.charAt(0).toUpperCase() || "U");
           setRole(null);
@@ -142,25 +65,6 @@ export default function Navbar() {
         setUserEmail(null);
         setDisplayName(null);
         setRole(null);
-
-        // #region agent log
-        fetch("http://127.0.0.1:7485/ingest/db6b879b-5d08-4f09-bd87-72e04b66a284", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-Debug-Session-Id": "dfce06",
-          },
-          body: JSON.stringify({
-            sessionId: "dfce06",
-            runId: "pre-fix",
-            hypothesisId: "nav-auth-4",
-            location: "components/Navbar.tsx:onAuthStateChange:logged-out",
-            message: "Navbar observed logged-out state",
-            data: {},
-            timestamp: Date.now(),
-          }),
-        }).catch(() => {});
-        // #endregion agent log
       }
     });
 

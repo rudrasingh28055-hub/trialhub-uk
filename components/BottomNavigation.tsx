@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/client";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { colors, typography, borderRadius, glassPanel, gradient, pitchGrid } from "@/lib/design/tokens";
@@ -84,7 +84,7 @@ export default function BottomNavigation() {
           borderTop: `1px solid ${colors.glass.border}`,
           borderLeft: `1px solid ${colors.glass.border}`,
           borderRight: `1px solid ${colors.glass.border}`,
-          backdropFilter: "backdrop-blur-xl(20px)"
+          backdropFilter: "blur(20px)"
         }}
       >
         <div className="flex items-center justify-around py-2">
