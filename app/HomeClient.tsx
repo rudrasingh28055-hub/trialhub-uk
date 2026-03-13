@@ -480,35 +480,6 @@ export default function HomeClient({ opportunities, user, role, displayName }: H
               Where football talent gets discovered
             </motion.p>
 
-            {/* Stat strip */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.5 }}
-              className="flex justify-center items-center mb-12 mx-auto"
-              style={{ maxWidth: "480px" }}
-            >
-              {[
-                { number: "2,400+", label: "Athletes" },
-                { number: "180+", label: "Clubs" },
-                { number: "45", label: "Countries" }
-              ].map((stat, i) => (
-                <div key={stat.label} className="flex items-center">
-                  {i > 0 && (
-                    <div style={{ width: "1px", height: "32px", background: "rgba(255,255,255,0.1)", margin: "0 24px" }} />
-                  )}
-                  <div className="text-center">
-                    <div style={{ fontSize: "20px", fontFamily: "'Satoshi', sans-serif", fontWeight: 700, color: "#F8FAFC" }}>
-                      {stat.number}
-                    </div>
-                    <div style={{ fontSize: "12px", fontFamily: "Inter, sans-serif", color: "rgba(255,255,255,0.45)" }}>
-                      {stat.label}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </motion.div>
-
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -818,7 +789,7 @@ export default function HomeClient({ opportunities, user, role, displayName }: H
                       ) : (
                         <div>
                           {transferNews.map((article, i) => (
-                            <div key={article.url}>
+                            <div key={`${article.link || article.url || i}-${i}`}>
                               <div
                                 role="link"
                                 tabIndex={0}

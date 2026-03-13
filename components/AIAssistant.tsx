@@ -35,22 +35,26 @@ export default function AIAssistant({ isOpen, onClose, context }: AIAssistantPro
 
   const [playerContext, setPlayerContext] = useState<{
     name: string;
-    position: string; 
+    position: string;
     club: string;
     role: string;
     totalPosts: number;
     recentHighlights: any[];
     recentActions: any[];
     competitions: any[];
+    age: number | null;
+    city: string;
   }>({
     name: 'Player',
-    position: 'Not set', 
+    position: 'Not set',
     club: 'Not set',
     role: 'athlete',
     totalPosts: 0,
     recentHighlights: [],
     recentActions: [],
-    competitions: []
+    competitions: [],
+    age: null,
+    city: '',
   });
 
   const supabase = createClient();
@@ -78,6 +82,17 @@ export default function AIAssistant({ isOpen, onClose, context }: AIAssistantPro
       console.log("Full profile data:", JSON.stringify(profileData))
       console.log("Profile error:", profileError)
 
+      // Fetch player_profiles for richer context
+      let playerProfileData: any = null
+      if (profileData?.id) {
+        const { data: pp } = await supabase
+          .from('player_profiles')
+          .select('primary_position, age, previous_club')
+          .eq('profile_id', profileData.id)
+          .maybeSingle()
+        playerProfileData = pp
+      }
+
       const [postsRes] = await Promise.all([
         supabase
           .from('posts')
@@ -89,14 +104,15 @@ export default function AIAssistant({ isOpen, onClose, context }: AIAssistantPro
 
       console.log("🔍 Posts data:", postsRes.data?.length || 0, "posts")
 
-      // Map position from whichever column exists
-      const position = profileData?.position || 
+      // Map position from whichever column exists (player_profiles takes priority)
+      const position = playerProfileData?.primary_position ||
+                       profileData?.position ||
                        profileData?.player_position ||
                        profileData?.primary_position ||
                        'Not set'
 
       // Map name from whichever column exists
-      const name = profileData?.full_name || 
+      const name = profileData?.full_name ||
                    profileData?.name ||
                    profileData?.username ||
                    user.email?.split('@')[0] ||
@@ -105,15 +121,17 @@ export default function AIAssistant({ isOpen, onClose, context }: AIAssistantPro
       const newContext = {
         name: name,
         position: position,
-        club: profileData?.club || 'Not set',
+        club: playerProfileData?.previous_club || profileData?.club || 'Not set',
         role: profileData?.role || 'athlete',
         totalPosts: postsRes.data?.length || 0,
-        recentHighlights: postsRes.data?.filter(p => 
-          p.content_type === 'match_highlight' || 
+        recentHighlights: postsRes.data?.filter(p =>
+          p.content_type === 'match_highlight' ||
           p.content_type === 'training_clip'
         ).slice(0, 5) || [],
         recentActions: postsRes.data?.map(p => p.action_type).filter((action: any) => Boolean(action)).slice(0, 5) || [],
-        competitions: Array.from(new Set(postsRes.data?.map(p => p.competition).filter((comp: any) => Boolean(comp)) || []))
+        competitions: Array.from(new Set(postsRes.data?.map(p => p.competition).filter((comp: any) => Boolean(comp)) || [])),
+        age: playerProfileData?.age ?? null,
+        city: profileData?.city || '',
       }
 
       console.log("🔍 Setting player context:", newContext)
@@ -170,6 +188,15 @@ export default function AIAssistant({ isOpen, onClose, context }: AIAssistantPro
         return;
       }
       
+      // Build personalised player context string for the API
+      const playerContextStr = [
+        playerContext.name !== 'Player' ? `Player: ${playerContext.name}` : null,
+        playerContext.position !== 'Not set' ? `Position: ${playerContext.position}` : null,
+        playerContext.age ? `Age: ${playerContext.age}` : null,
+        playerContext.club !== 'Not set' ? `Club: ${playerContext.club}` : null,
+        playerContext.city ? `Location: ${playerContext.city}` : null,
+      ].filter(Boolean).join(', ')
+
       const response = await fetch('/api/ai/suggest', {
         method: 'POST',
         headers: {
@@ -180,7 +207,8 @@ export default function AIAssistant({ isOpen, onClose, context }: AIAssistantPro
             role: msg.role,
             content: msg.content
           })),
-          systemPrompt
+          systemPrompt,
+          playerContext: playerContextStr || undefined,
         }),
       });
 

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
   try {
-    const { messages, systemPrompt } = await request.json()
+    const { messages, systemPrompt, playerContext } = await request.json()
     
     console.log("=== AI API Call Started ===")
     console.log("Messages received:", JSON.stringify(messages, null, 2))
@@ -42,13 +42,17 @@ export async function POST(request: Request) {
 
     console.log("🚀 Making Groq API call...")
     
-    // Use short system prompt to avoid empty responses
-    const finalSystemPrompt = systemPrompt && systemPrompt.length < 500 
-      ? systemPrompt 
-      : `You are Debut AI, a football career assistant. 
-Help grassroots football players get discovered by scouts. 
-Be concise, encouraging, and specific to football. 
-Never make up stats. Keep responses under 100 words.`
+    // Build football-specific, player-aware system prompt
+    const baseFootballPrompt = `You are a personal football development assistant on DEBUT, a football talent discovery platform. You help athletes improve their game, understand their stats, and get discovered by scouts. Be specific, practical, and encouraging. Avoid generic advice - tailor everything to football performance. Keep responses concise (under 120 words). Never invent performance data.`
+
+    let contextualPrompt = baseFootballPrompt
+    if (playerContext && typeof playerContext === 'string' && playerContext.trim().length > 0) {
+      contextualPrompt = `${baseFootballPrompt}\n\nPlayer context: ${playerContext}`
+    }
+
+    const finalSystemPrompt = (systemPrompt && systemPrompt.length > 10 && systemPrompt.length < 600)
+      ? (playerContext ? `${systemPrompt}\n\nPlayer context: ${playerContext}` : systemPrompt)
+      : contextualPrompt
     
     const requestBody = {
       model: "llama-3.3-70b-versatile",

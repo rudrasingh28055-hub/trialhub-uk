@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import { colors, typography, gradient, glassPanel, borderRadius } from "@/lib/design/tokens";
+import { FollowButton } from "@/components/FollowButton";
 
 interface Profile {
   id: string;
@@ -15,6 +16,7 @@ interface Profile {
 }
 
 interface PlayerProfile {
+  id: string;
   age: number | null;
   primary_position: string | null;
   secondary_position: string | null;
@@ -95,6 +97,8 @@ export default function PlayerProfile() {
   const [viewerRole, setViewerRole] = useState<string | null>(null);
   const [isOwnProfile, setIsOwnProfile] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [viewerProfileId, setViewerProfileId] = useState<string | null>(null);
+  const [coachReviews, setCoachReviews] = useState<any[]>([]);
 
   useEffect(() => {
     if (!playerId) return;
@@ -114,11 +118,21 @@ export default function PlayerProfile() {
 
         const { data: pp } = await supabase
           .from("player_profiles")
-          .select("age, primary_position, secondary_position, dominant_foot, height_cm, previous_club, video_url, instagram_url, avatar_url")
+          .select("id, age, primary_position, secondary_position, dominant_foot, height_cm, previous_club, video_url, instagram_url, avatar_url")
           .eq("profile_id", prof.id)
           .maybeSingle();
 
         setPlayerProfile(pp ?? null);
+
+        // Fetch coach reviews if player_profile exists
+        if (pp?.id) {
+          const { data: reviews } = await supabase
+            .from("coach_reviews")
+            .select("id, reviewer_name, reviewer_title, rating, review_text, categories, created_at")
+            .eq("player_profile_id", pp.id)
+            .order("created_at", { ascending: false });
+          setCoachReviews(reviews ?? []);
+        }
       }
 
       // Check viewer identity
@@ -133,6 +147,7 @@ export default function PlayerProfile() {
         if (viewerProf) {
           setViewerRole(viewerProf.role ?? null);
           setIsOwnProfile(viewerProf.id === playerId);
+          setViewerProfileId(viewerProf.id);
         }
       }
 
@@ -285,6 +300,16 @@ export default function PlayerProfile() {
                     {[city, age].filter(Boolean).join(" · ")}
                   </p>
                 )}
+
+                {/* Follow button — shown to logged-in users who are not the profile owner */}
+                {viewerProfileId && !isOwnProfile && (
+                  <div style={{ marginTop: 16, display: "flex", justifyContent: "center" }}>
+                    <FollowButton
+                      currentProfileId={viewerProfileId}
+                      targetProfileId={playerId}
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Stats strip */}
@@ -347,6 +372,49 @@ export default function PlayerProfile() {
           </motion.section>
         )}
 
+        {/* Performance Snapshot */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.13 }}
+          style={{ marginBottom: 32 }}
+        >
+          <h2 style={{
+            fontFamily: "'Satoshi', Inter, sans-serif",
+            fontWeight: 900,
+            fontSize: 20,
+            color: colors.white,
+            letterSpacing: "-0.02em",
+            marginBottom: 16,
+          }}>
+            Performance Snapshot
+          </h2>
+          <div style={{
+            background: "rgba(255,255,255,0.04)",
+            border: "1px solid rgba(255,255,255,0.08)",
+            borderRadius: 14,
+            padding: "20px 24px",
+          }}>
+            {[
+              { label: "Pace", value: 60 },
+              { label: "Shooting", value: 50 },
+              { label: "Passing", value: 55 },
+              { label: "Dribbling", value: 58 },
+              { label: "Defending", value: 45 },
+            ].map(skill => (
+              <div key={skill.label} style={{ marginBottom: 14 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                  <span style={{ fontSize: 13, color: colors.muted, fontFamily: "Inter, sans-serif", fontWeight: 500 }}>{skill.label}</span>
+                  <span style={{ fontSize: 13, color: colors.white, fontWeight: 600 }}>{skill.value}</span>
+                </div>
+                <div style={{ height: 4, borderRadius: 2, background: "rgba(255,255,255,0.08)" }}>
+                  <div style={{ height: "100%", width: `${skill.value}%`, borderRadius: 2, background: "linear-gradient(90deg, #7C3AED, #2563EB)" }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </motion.section>
+
         {/* Stats Grid */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
@@ -365,32 +433,126 @@ export default function PlayerProfile() {
             Career Stats
           </h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 }}>
-            {[
-              { label: "Matches Played", value: "—", icon: "⚽" },
-              { label: "Goals", value: "—", icon: "🎯" },
-              { label: "Assists", value: "—", icon: "🅰️" },
-              { label: "Hours Trained", value: "—", icon: "⏱️" },
-            ].map(stat => (
-              <div
-                key={stat.label}
-                style={{
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  borderRadius: 14,
-                  padding: "20px 20px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 16,
-                }}
-              >
-                <span style={{ fontSize: 28 }}>{stat.icon}</span>
-                <div>
-                  <div style={{ fontSize: 24, fontWeight: 800, color: colors.white, lineHeight: 1 }}>{stat.value}</div>
-                  <div style={{ fontSize: 12, color: colors.muted, marginTop: 4, textTransform: "uppercase", letterSpacing: "0.05em" }}>{stat.label}</div>
-                </div>
-              </div>
-            ))}
+            {(() => {
+              const statsData = [
+                { label: "Matches Played", rawValue: null as number | null, icon: "⚽", max: 50 },
+                { label: "Goals", rawValue: null as number | null, icon: "🎯", max: 30 },
+                { label: "Assists", rawValue: null as number | null, icon: "🅰️", max: 20 },
+                { label: "Hours Trained", rawValue: null as number | null, icon: "⏱️", max: 200 },
+              ];
+              return statsData.map(stat => {
+                const pct = stat.rawValue
+                  ? Math.min(100, Math.round((stat.rawValue / stat.max) * 100))
+                  : 5;
+                return (
+                  <div
+                    key={stat.label}
+                    style={{
+                      background: "rgba(255,255,255,0.04)",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                      borderRadius: 14,
+                      padding: "20px 20px",
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: 16,
+                    }}
+                  >
+                    <span style={{ fontSize: 28 }}>{stat.icon}</span>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 24, fontWeight: 800, color: colors.white, lineHeight: 1 }}>{stat.rawValue ?? "—"}</div>
+                      <div style={{ fontSize: 12, color: colors.muted, marginTop: 4, textTransform: "uppercase", letterSpacing: "0.05em" }}>{stat.label}</div>
+                      <div style={{ height: 3, borderRadius: 2, background: "rgba(255,255,255,0.1)", marginTop: 8 }}>
+                        <div style={{ height: "100%", width: `${pct}%`, borderRadius: 2, background: "linear-gradient(90deg, #7C3AED, #2563EB)" }} />
+                      </div>
+                    </div>
+                  </div>
+                );
+              });
+            })()}
           </div>
+        </motion.section>
+
+        {/* Coach Reviews */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.18 }}
+          style={{ marginBottom: 32 }}
+        >
+          <h2 style={{
+            fontFamily: "'Satoshi', Inter, sans-serif",
+            fontWeight: 900,
+            fontSize: 20,
+            color: colors.white,
+            letterSpacing: "-0.02em",
+            marginBottom: 16,
+          }}>
+            Coach Reviews
+          </h2>
+          {coachReviews.length === 0 ? (
+            <div style={{
+              background: "rgba(255,255,255,0.04)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              borderRadius: 14,
+              padding: "28px 24px",
+              textAlign: "center",
+            }}>
+              <p style={{ color: colors.muted, fontSize: 14, fontFamily: "Inter, sans-serif" }}>No coach reviews yet</p>
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              {coachReviews.map((review: any) => {
+                const cats = review.categories as Record<string, number> | null;
+                const catKeys = cats ? Object.keys(cats) : [];
+                return (
+                  <div
+                    key={review.id}
+                    style={{
+                      background: "rgba(255,255,255,0.04)",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                      borderRadius: 14,
+                      padding: "20px 24px",
+                    }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
+                      <div>
+                        <div style={{ fontSize: 15, fontWeight: 700, color: colors.white }}>{review.reviewer_name}</div>
+                        {review.reviewer_title && (
+                          <div style={{ fontSize: 12, color: colors.muted, marginTop: 2 }}>{review.reviewer_title}</div>
+                        )}
+                      </div>
+                      <div style={{ display: "flex", gap: 2 }}>
+                        {[1, 2, 3, 4, 5].map(star => (
+                          <span key={star} style={{ fontSize: 14, color: star <= (review.rating ?? 0) ? "#FBBF24" : "rgba(255,255,255,0.15)" }}>★</span>
+                        ))}
+                      </div>
+                    </div>
+                    {review.review_text && (
+                      <p style={{ color: "#C4C4CC", fontSize: 14, lineHeight: 1.6, marginBottom: catKeys.length ? 14 : 0 }}>{review.review_text}</p>
+                    )}
+                    {catKeys.length > 0 && (
+                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                        {catKeys.map(cat => (
+                          <div key={cat}>
+                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                              <span style={{ fontSize: 11, color: colors.muted, textTransform: "capitalize", fontFamily: "Inter, sans-serif" }}>{cat}</span>
+                              <span style={{ fontSize: 11, color: colors.white, fontWeight: 600 }}>{cats![cat]}/5</span>
+                            </div>
+                            <div style={{ height: 3, borderRadius: 2, background: "rgba(255,255,255,0.08)" }}>
+                              <div style={{ height: "100%", width: `${(cats![cat] / 5) * 100}%`, borderRadius: 2, background: "linear-gradient(90deg, #7C3AED, #2563EB)" }} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <div style={{ fontSize: 11, color: colors.muted, marginTop: 12, fontFamily: "Inter, sans-serif" }}>
+                      {new Date(review.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </motion.section>
 
         {/* About */}

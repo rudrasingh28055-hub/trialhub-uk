@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { colors, typography, borderRadius, glassPanel } from "@/lib/design/tokens";
+import { FollowButton } from "@/components/FollowButton";
 
 export type PlayerCardProps = {
   profile_id: string;
@@ -18,6 +19,7 @@ export type PlayerCardProps = {
   scoutInterest?: number;
   isVerified?: boolean;
   avatarUrl?: string;
+  currentProfileId?: string;
 };
 
 export default function PlayerCard(props: PlayerCardProps) {
@@ -38,6 +40,7 @@ export default function PlayerCard(props: PlayerCardProps) {
     scoutInterest = 0,
     isVerified = false,
     avatarUrl,
+    currentProfileId,
   } = props;
 
   return (
@@ -191,13 +194,27 @@ export default function PlayerCard(props: PlayerCardProps) {
             </svg>
             {scoutInterest} Scouts
           </div>
-          
+
           {previous_club && (
             <div className="text-sm truncate" style={{ color: colors.muted }}>
               {previous_club}
             </div>
           )}
         </div>
+
+        {/* Follow button */}
+        {currentProfileId && currentProfileId !== profile_id && (
+          <div
+            className="mt-3 pt-3 border-t"
+            style={{ borderColor: 'rgba(255,255,255,0.1)' }}
+            onClick={(e) => e.preventDefault()}
+          >
+            <FollowButton
+              currentProfileId={currentProfileId}
+              targetProfileId={profile_id}
+            />
+          </div>
+        )}
       </div>
     </Link>
   );
