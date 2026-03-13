@@ -148,8 +148,12 @@ export function PostCard({ post, currentUserId, onLikeToggle }: PostCardProps) {
               )}
             </div>
             <div className="flex items-center gap-2 text-xs" style={{ color: colors.muted }}>
-              <span>{post.author?.player_profile?.primary_position}</span>
-              <span>•</span>
+              {post.author?.player_profile?.primary_position && (
+                <>
+                  <span>{post.author.player_profile.primary_position}</span>
+                  <span>•</span>
+                </>
+              )}
               <span>{formatDate(post.created_at)}</span>
             </div>
           </div>
@@ -244,7 +248,7 @@ export function PostCard({ post, currentUserId, onLikeToggle }: PostCardProps) {
                 borderRadius: borderRadius.pill
               }}
             >
-              � {post.club_history_tag}
+              🏆 {post.club_history_tag}
             </div>
           )}
           {post.match_tag && (

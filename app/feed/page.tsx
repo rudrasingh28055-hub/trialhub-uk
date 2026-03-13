@@ -24,14 +24,14 @@ export default async function FeedPage() {
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
-      .eq("id", user.id)
+      .eq("user_id", user.id)
       .single();
     
     userRole = profile?.role;
   }
 
   return (
-    <main className="min-h-screen" style={{ backgroundColor: colors.black }}>
+    <main className="min-h-screen" style={{ backgroundColor: colors.obsidian }}>
       <Navbar />
 
       <section className="relative mx-auto max-w-7xl px-6 py-8 pt-10">
