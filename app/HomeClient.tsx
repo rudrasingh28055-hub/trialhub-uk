@@ -97,8 +97,14 @@ export default function HomeClient({ opportunities, user, role, displayName }: H
     }
   }
 
-  const fetchLiveData = async () => {
-    // Implementation will go here
+  const timeAgo = (dateString: string) => {
+    const diff = Date.now() - new Date(dateString).getTime()
+    const h = Math.floor(diff / 3600000)
+    const m = Math.floor(diff / 60000)
+    if (h >= 24) return `${Math.floor(h / 24)}d ago`
+    if (h >= 1) return `${h}h ago`
+    if (m >= 1) return `${m}m ago`
+    return 'Just now'
   }
 
   const fetchLiveScores = async () => {
@@ -682,55 +688,57 @@ export default function HomeClient({ opportunities, user, role, displayName }: H
                   )}
 
                   {activeTab === "transfer" && (
-                    <div className="p-6">
+                    <div>
                       {transferNews.length === 0 ? (
-                        <div className="space-y-4">
-                          {[1, 2, 3, 4].map((i) => (
-                            <div key={i} className="p-4 rounded-lg" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                              <h3 className="text-white font-medium mb-2" style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "18px", fontWeight: 700 }}>
-                                Add NEWS_API_KEY to .env.local for live transfer news
-                              </h3>
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2 text-sm" style={{ color: "rgba(255,255,255,0.7)", fontFamily: "Inter, sans-serif" }}>
-                                  <span>Get a free key at newsapi.org</span>
-                                  <span>•</span>
-                                  <span>Transfer news</span>
-                                </div>
-                                <div className="text-violet-400">
-                                  →
-                                </div>
-                              </div>
-                            </div>
-                          ))}
+                        <div className="text-center py-12" style={{ color: "rgba(255,255,255,0.4)" }}>
+                          <p style={{ fontFamily: "'Satoshi', sans-serif", fontSize: 16, marginBottom: 8 }}>No news available</p>
+                          <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13 }}>Add NEWS_API_KEY to .env.local</p>
                         </div>
                       ) : (
-                        <div className="space-y-4">
-                          {transferNews.map((article) => (
-                            <motion.div
-                              key={article.url}
-                              whileHover={{ x: 8 }}
-                              whileTap={{ scale: 0.98 }}
-                              className="p-4 rounded-lg cursor-pointer transition-all duration-200 ease hover:translate-y-[-2px]"
-                              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
-                              onClick={() => window.open(article.url, '_blank')}
-                            >
-                              <h3 className="text-white font-medium mb-2" style={{ fontFamily: "'Satoshi', sans-serif", fontSize: "18px", fontWeight: 700 }}>
-                                {article.title}
-                              </h3>
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2 text-sm" style={{ color: "rgba(255,255,255,0.7)", fontFamily: "Inter, sans-serif" }}>
-                                  <span>{article.source?.name}</span>
-                                  <span>•</span>
-                                  <span>{new Date(article.publishedAt).toLocaleDateString()}</span>
+                        <div>
+                          {transferNews.map((article, i) => (
+                            <div key={article.url}>
+                              <div
+                                role="link"
+                                tabIndex={0}
+                                onClick={() => window.open(article.url, '_blank')}
+                                onKeyDown={(e) => e.key === 'Enter' && window.open(article.url, '_blank')}
+                                style={{ display: 'flex', gap: 16, padding: '16px 20px', cursor: 'pointer', transition: 'background 0.15s' }}
+                                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.03)')}
+                                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                              >
+                                {/* Thumbnail */}
+                                {article.urlToImage && (
+                                  <div style={{ flexShrink: 0, width: 88, height: 66, borderRadius: 8, overflow: 'hidden', background: 'rgba(255,255,255,0.06)' }}>
+                                    <img
+                                      src={article.urlToImage}
+                                      alt=""
+                                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                      onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
+                                    />
+                                  </div>
+                                )}
+                                {/* Text */}
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  <p style={{
+                                    color: '#F8FAFC', fontFamily: "'Satoshi', sans-serif",
+                                    fontWeight: 700, fontSize: 14, lineHeight: 1.45,
+                                    marginBottom: 8, display: '-webkit-box',
+                                    WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden'
+                                  }}>
+                                    {article.title}
+                                  </p>
+                                  <p style={{ color: 'rgba(255,255,255,0.38)', fontFamily: 'Inter, sans-serif', fontSize: 12 }}>
+                                    {article.source?.name}
+                                    <span style={{ margin: '0 6px' }}>·</span>
+                                    {timeAgo(article.publishedAt)}
+                                  </p>
                                 </div>
-                                <motion.div
-                                  whileHover={{ x: 4 }}
-                                  className="text-violet-400"
-                                >
-                                  →
-                                </motion.div>
                               </div>
-                            </motion.div>
+                              {i < transferNews.length - 1 && (
+                                <div style={{ height: 1, background: 'rgba(255,255,255,0.05)', margin: '0 20px' }} />
+                              )}
+                            </div>
                           ))}
                         </div>
                       )}

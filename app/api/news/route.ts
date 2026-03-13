@@ -7,7 +7,7 @@ export async function GET() {
   }
   
   try {
-    const url = `https://newsapi.org/v2/everything?q=football+transfer+OR+Premier+League+OR+Champions+League&sortBy=publishedAt&language=en&pageSize=20&apiKey=${apiKey}`
+    const url = `https://newsapi.org/v2/everything?q=football+transfer+OR+Premier+League+OR+Champions+League&domains=bbc.co.uk,theguardian.com,skysports.com,goal.com,90min.com&sortBy=publishedAt&language=en&pageSize=30&apiKey=${apiKey}`
 
     const res = await fetch(url)
     const data = await res.json()
@@ -75,7 +75,7 @@ export async function GET() {
         text.includes('quarterback') ||
         text.includes('nfl draft')
       
-      return isFootball && !isOtherSport
+      return isFootball && !isOtherSport && !!article.urlToImage
     }) || []
 
     const sorted = filtered
@@ -83,7 +83,7 @@ export async function GET() {
         new Date(b.publishedAt).getTime() - 
         new Date(a.publishedAt).getTime()
       )
-      .slice(0, 4)
+      .slice(0, 6)
 
     if (sorted.length === 0) {
       return NextResponse.json({ 
