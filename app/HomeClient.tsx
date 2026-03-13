@@ -142,8 +142,8 @@ export default function HomeClient({ opportunities, user, role, displayName }: H
       cachedLiveData.current = transformedMatches;
       setLiveMatches(transformedMatches);
       
-      // Auto-switch to upcoming if no live matches
-      if (matches.length === 0) {
+      // Auto-switch to upcoming if no live matches or API returned upcoming as fallback
+      if (matches.length === 0 || data.fallback) {
         setActiveTab("upcoming");
       }
       
@@ -455,7 +455,7 @@ export default function HomeClient({ opportunities, user, role, displayName }: H
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.2 }}
               className="text-white text-center mb-12"
-              style={{ fontSize: "40px", fontFamily: "'Satoshi', sans-serif", fontWeight: 800, letterSpacing: "-0.02em" }}
+              style={{ fontSize: "clamp(32px,5vw,56px)", fontFamily: "'Satoshi', sans-serif", fontWeight: 900, letterSpacing: "-0.03em", background: "linear-gradient(135deg,#fff 40%,rgba(255,255,255,0.55))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}
             >
               What's Happening
             </motion.h2>

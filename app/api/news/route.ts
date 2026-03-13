@@ -68,7 +68,12 @@ export async function GET() {
         text.includes('wbc') ||
         text.includes('ravens') ||
         text.includes('lakers') ||
-        text.includes('knicks')
+        text.includes('knicks') ||
+        text.includes('patriots') ||
+        text.includes('touchdown') ||
+        text.includes('super bowl') ||
+        text.includes('quarterback') ||
+        text.includes('nfl draft')
       
       return isFootball && !isOtherSport
     }) || []
