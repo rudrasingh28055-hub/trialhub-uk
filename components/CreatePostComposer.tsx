@@ -1891,11 +1891,11 @@ const videoDurationRef = useRef<number>(47); // Default fallback duration
                         <button onClick={goBack} className="px-6 py-3 transition-all" style={{ backgroundColor: colors.surface, color: colors.white, border: `1px solid ${colors.input}`, borderRadius: `${borderRadius.button}px` }}>
                           Back
                         </button>
-                        <button onClick={() => goToStep(3)} className="px-6 py-3 font-medium transition-all" style={{ 
+                        <button onClick={() => goToStep(4)} className="px-6 py-3 font-medium transition-all" style={{
                           fontFamily: typography.family,
                           fontWeight: typography.semibold,
-                          backgroundColor: colors.electricViolet, 
-                          color: colors.white, 
+                          backgroundColor: colors.electricViolet,
+                          color: colors.white,
                           borderRadius: `${borderRadius.button}px`
                         }}>
                           Next: Publish
