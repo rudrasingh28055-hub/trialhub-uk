@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { colors, typography, borderRadius, glassPanel } from "@/lib/design/tokens";
 import { FollowButton } from "@/components/FollowButton";
