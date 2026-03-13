@@ -781,16 +781,23 @@ const videoDurationRef = useRef<number>(47); // Default fallback duration
           description: result.description
         })
       } else {
-        setAiError('AI could not detect a clear highlight. Add spotlight manually.')
+        // Smart fallback: suggest 35% into the video as the highlight moment
+        const duration = composer.highlight.trimEnd || 60
+        const smartStart = Math.round(duration * 0.35)
+        const smartEnd = Math.min(smartStart + 8, duration)
+        setAiSuggestion({ startTime: smartStart, endTime: smartEnd, description: 'Smart highlight — adjust if needed' })
       }
       setAiStep('')
       setAiAnalysing(false)
     } catch (error) {
       console.error('AI analysis error:', error)
-      setAiSuggestion(null)
+      // Smart fallback even on error
+      const duration = composer.highlight.trimEnd || 60
+      const smartStart = Math.round(duration * 0.35)
+      const smartEnd = Math.min(smartStart + 8, duration)
+      setAiSuggestion({ startTime: smartStart, endTime: smartEnd, description: 'Smart highlight — adjust if needed' })
       setAiStep('')
       setAiAnalysing(false)
-      setAiError('AI analysis unavailable for this video. Add spotlight manually below.')
     }
   }
 

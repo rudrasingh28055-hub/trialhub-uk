@@ -67,10 +67,10 @@ export async function POST(request: Request) {
         },
         body: JSON.stringify({
           index_id: TWELVELABS_INDEX_ID,
-          query: 'best football moment shot goal skill dribble tackle sprint',
-          search_options: ['visual', 'conversation'],
-          filter: { id: [videoId] },
-          page_limit: 1
+          query: 'goal shot dribble skill sprint tackle best moment highlight',
+          search_options: ['visual'],
+          filter: { video_id: [videoId] },
+          page_limit: 3
         })
       })
       const searchData = await searchRes.json()
