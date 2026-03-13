@@ -155,8 +155,8 @@ export default function HomeClient({ opportunities, user, role, displayName }: H
       setLiveMatches(transformedMatches);
       setResultsOnly(!!data.resultsOnly);
 
-      // Auto-switch to upcoming only when truly nothing to show
-      if (matches.length === 0 || data.fallback) {
+      // Only auto-switch when there truly are no live games AND no today's results
+      if (data.fallback) {
         setActiveTab("upcoming");
       }
       
@@ -441,10 +441,10 @@ export default function HomeClient({ opportunities, user, role, displayName }: H
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="relative min-h-screen flex items-center justify-center px-6"
+          className="relative flex items-center justify-center px-6"
           style={{
-            paddingTop: "96px",
-            paddingBottom: "96px",
+            paddingTop: "80px",
+            paddingBottom: "64px",
             background: "radial-gradient(ellipse at 60% 0%, rgba(124,58,237,0.15) 0%, transparent 60%)"
           }}
         >
@@ -453,9 +453,9 @@ export default function HomeClient({ opportunities, user, role, displayName }: H
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="text-white mb-6"
+              className="text-white mb-4"
               style={{
-                fontSize: "96px",
+                fontSize: "clamp(64px, 12vw, 96px)",
                 fontFamily: "'Satoshi', sans-serif",
                 fontWeight: 900,
                 letterSpacing: "-0.04em"
@@ -467,14 +467,30 @@ export default function HomeClient({ opportunities, user, role, displayName }: H
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-              className="mb-10 mx-auto"
+              transition={{ duration: 0.8, delay: 0.3 }}
+              className="mb-2 mx-auto"
               style={{
-                fontSize: "18px",
-                maxWidth: "480px",
-                color: "rgba(255,255,255,0.5)",
+                fontSize: "clamp(16px, 2vw, 20px)",
+                maxWidth: "520px",
+                color: "rgba(255,255,255,0.75)",
+                fontFamily: "'Satoshi', sans-serif",
+                fontWeight: 700,
+                letterSpacing: "-0.01em"
+              }}
+            >
+              Built for players who deserve to be seen
+            </motion.p>
+
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              className="mb-8 mx-auto"
+              style={{
+                fontSize: "15px",
+                maxWidth: "400px",
+                color: "rgba(255,255,255,0.4)",
                 fontFamily: "Inter, sans-serif",
-                letterSpacing: "0"
               }}
             >
               Where football talent gets discovered
@@ -483,8 +499,8 @@ export default function HomeClient({ opportunities, user, role, displayName }: H
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.6 }}
-              className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+              transition={{ duration: 0.8, delay: 0.5 }}
+              className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12"
             >
               <motion.div
                 whileHover={{ scale: 1.05, boxShadow: "0 0 32px rgba(124, 58, 237, 0.5)" }}
@@ -492,7 +508,7 @@ export default function HomeClient({ opportunities, user, role, displayName }: H
               >
                 <Link
                   href="/signup"
-                  className="inline-flex items-center px-10 py-4 text-lg font-bold text-white transition-all duration-150 ease hover:translate-y-[-1px] hover:brightness-110 active:translate-y-0 active:scale-98"
+                  className="inline-flex items-center px-10 py-4 text-lg font-bold text-white transition-all duration-150 ease hover:translate-y-[-1px] hover:brightness-110 active:translate-y-0"
                   style={{
                     background: "linear-gradient(135deg, #7C3AED, #2563EB)",
                     borderRadius: "999px",
@@ -504,14 +520,14 @@ export default function HomeClient({ opportunities, user, role, displayName }: H
                   Get Started
                 </Link>
               </motion.div>
-              
+
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.98 }}
               >
                 <Link
                   href="/feed"
-                  className="inline-flex items-center px-10 py-4 text-lg font-bold text-white transition-all duration-150 ease hover:translate-y-[-1px] hover:border-opacity-50 hover:bg-opacity-5 active:translate-y-0 active:scale-98 border"
+                  className="inline-flex items-center px-10 py-4 text-lg font-bold text-white transition-all duration-150 ease hover:translate-y-[-1px] active:translate-y-0 border"
                   style={{
                     borderColor: "rgba(255,255,255,0.2)",
                     borderRadius: "999px",
@@ -524,11 +540,41 @@ export default function HomeClient({ opportunities, user, role, displayName }: H
                 </Link>
               </motion.div>
             </motion.div>
+
+            {/* Feature icons */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.7 }}
+              className="flex flex-col sm:flex-row gap-3 justify-center items-center"
+            >
+              {[
+                { icon: "⚡", label: "AI Spotlight Detection" },
+                { icon: "🎥", label: "Highlight Reels" },
+                { icon: "🔍", label: "Scout Discovery" },
+              ].map((feat) => (
+                <div
+                  key={feat.label}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "8px 18px",
+                    background: "rgba(255,255,255,0.05)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    borderRadius: 999,
+                  }}
+                >
+                  <span style={{ fontSize: 16 }}>{feat.icon}</span>
+                  <span style={{ fontSize: 13, fontFamily: "Inter, sans-serif", fontWeight: 500, color: "rgba(255,255,255,0.65)" }}>{feat.label}</span>
+                </div>
+              ))}
+            </motion.div>
           </div>
         </motion.section>
 
         {/* HOW IT WORKS */}
-        <section className="relative px-6" style={{ paddingTop: "96px", paddingBottom: "80px", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+        <section className="relative px-6" style={{ paddingTop: "64px", paddingBottom: "56px", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
           <div className="max-w-4xl mx-auto text-center">
             <p style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontWeight: 600, letterSpacing: "0.14em", color: "#7C3AED", textTransform: "uppercase", marginBottom: 16 }}>
               The process
@@ -611,7 +657,7 @@ export default function HomeClient({ opportunities, user, role, displayName }: H
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             className="relative px-6"
-            style={{ paddingTop: "64px", paddingBottom: "64px" }}
+            style={{ paddingTop: "40px", paddingBottom: "40px" }}
           >
             <div className="max-w-2xl mx-auto">
               <div
@@ -663,25 +709,15 @@ export default function HomeClient({ opportunities, user, role, displayName }: H
         )}
 
         {/* WHAT'S HAPPENING SECTION */}
-        <motion.section 
+        <motion.section
           ref={footballRef}
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           className="relative px-6"
-          style={{ paddingTop: "96px", paddingBottom: "96px" }}
+          style={{ paddingTop: "48px", paddingBottom: "80px" }}
         >
           <div className="max-w-7xl mx-auto">
-            <motion.h2
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="text-white text-center mb-12"
-              style={{ fontSize: "clamp(32px,5vw,56px)", fontFamily: "'Satoshi', sans-serif", fontWeight: 900, letterSpacing: "-0.03em", background: "linear-gradient(135deg,#fff 40%,rgba(255,255,255,0.55))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}
-            >
-              What's Happening
-            </motion.h2>
-
             {/* Tabs */}
             <div className="flex justify-center mb-8">
               <div

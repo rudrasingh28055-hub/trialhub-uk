@@ -42,11 +42,17 @@ export function FollowButton({ currentProfileId, targetProfileId, targetAccountV
   const border = status !== 'none' ? '1px solid rgba(255,255,255,0.2)' : 'none'
 
   return (
-    <button onClick={handleFollow} style={{
-      backgroundColor: bgColor, color: 'white', border,
-      padding: '8px 20px', borderRadius: '8px', fontSize: '14px',
-      fontWeight: 600, cursor: 'pointer', fontFamily: 'Inter, sans-serif'
-    }}>
+    <button
+      onClick={handleFollow}
+      style={{
+        backgroundColor: bgColor, color: 'white', border,
+        padding: '8px 20px', borderRadius: '8px', fontSize: '14px',
+        fontWeight: 600, cursor: 'pointer', fontFamily: 'Inter, sans-serif',
+        transition: 'all 0.15s ease', outline: 'none',
+      }}
+      onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.opacity = '0.85' }}
+      onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.opacity = '1' }}
+    >
       {label}
     </button>
   )

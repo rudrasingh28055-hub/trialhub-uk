@@ -56,6 +56,14 @@ export default async function PlayersPage({
     redirect("/login");
   }
 
+  // Get viewer's profile id for follow button
+  const { data: viewerProfile } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  const currentProfileId = viewerProfile?.id ?? null;
+
   const { data: athleteProfiles, error: profilesError } = await supabase
     .from("profiles")
     .select("id, full_name, city, bio")
@@ -170,7 +178,7 @@ export default async function PlayersPage({
   });
 
   return (
-    <main className="min-h-screen text-white">
+    <main className="min-h-screen text-white" style={{ background: "#0B0B0F" }}>
       <Navbar />
 
       <section className="mx-auto max-w-7xl px-6 py-12">
@@ -259,6 +267,7 @@ export default async function PlayersPage({
                 previous_club={athlete.previous_club}
                 video_url={athlete.video_url}
                 instagram_url={athlete.instagram_url}
+                currentProfileId={currentProfileId ?? undefined}
               />
             ))}
           </div>

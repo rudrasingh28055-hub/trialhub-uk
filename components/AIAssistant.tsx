@@ -238,30 +238,20 @@ export default function AIAssistant({ isOpen, onClose, context }: AIAssistantPro
 
   const buildSystemPrompt = () => {
     const ctx = playerContext;
-  
-    // Map pathnames to contexts
-    const pageContextMap: Record<string, string> = {
-      '/feed': 'User is browsing the highlights feed',
-      '/post/create': 'User is creating a new highlight post',
-      '/athlete/profile': 'User is viewing their own profile',
-      '/discover': 'User is on the scout discovery page',
-      '/': 'User is on the home page'
-    };
-  
-    const pageContext = pageContextMap[pathname] || `User is on page: ${pathname}`;
-  
-    const parts = [
-      "You are Debut AI, a football career assistant for grassroots players.",
-      ctx.name !== 'Player' ? `Player name: ${ctx.name}` : '',
-      ctx.position !== 'Not set' ? `Position: ${ctx.position}` : '',
-      ctx.club !== 'Not set' ? `Club: ${ctx.club}` : '',
-      `Highlights posted: ${ctx.totalPosts}`,
-      "Help them get discovered by scouts. Be concise, under 100 words per response.",
-      "Never invent performance data.",
-      `Current page: ${pageContext}` 
-    ].filter(Boolean)
-  
-    return parts.join('\n')
+    const name = ctx.name !== 'Player' ? ctx.name : 'this player';
+    const age = ctx.age ? `${ctx.age} year old` : '';
+    const position = ctx.position !== 'Not set' ? ctx.position : 'footballer';
+    const location = ctx.city || 'UK';
+    const club = ctx.club !== 'Not set' ? ctx.club : 'no current club';
+
+    return [
+      `You are a football career advisor for ${name}${age ? `, a ${age}` : ', a'} ${position} from ${location}.`,
+      `Previous club: ${club}.`,
+      `Highlights posted: ${ctx.totalPosts}.`,
+      `Give specific, personalised advice - never generic responses.`,
+      `Be concise (under 120 words). Never invent performance data.`,
+      `Help them get discovered by scouts and improve their career on DEBUT.`
+    ].join(' ');
   };
 
   const suggestedQuestions = (() => {

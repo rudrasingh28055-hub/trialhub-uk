@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import { colors, typography, gradient, glassPanel, borderRadius } from "@/lib/design/tokens";
 import { FollowButton } from "@/components/FollowButton";
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip } from "recharts";
 
 interface Profile {
   id: string;
@@ -415,7 +416,7 @@ export default function PlayerProfile() {
           </div>
         </motion.section>
 
-        {/* Stats Grid */}
+        {/* Career Stats Bar Chart */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -432,43 +433,58 @@ export default function PlayerProfile() {
           }}>
             Career Stats
           </h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 }}>
-            {(() => {
-              const statsData = [
-                { label: "Matches Played", rawValue: null as number | null, icon: "⚽", max: 50 },
-                { label: "Goals", rawValue: null as number | null, icon: "🎯", max: 30 },
-                { label: "Assists", rawValue: null as number | null, icon: "🅰️", max: 20 },
-                { label: "Hours Trained", rawValue: null as number | null, icon: "⏱️", max: 200 },
-              ];
-              return statsData.map(stat => {
-                const pct = stat.rawValue
-                  ? Math.min(100, Math.round((stat.rawValue / stat.max) * 100))
-                  : 5;
-                return (
-                  <div
-                    key={stat.label}
-                    style={{
-                      background: "rgba(255,255,255,0.04)",
-                      border: "1px solid rgba(255,255,255,0.08)",
-                      borderRadius: 14,
-                      padding: "20px 20px",
-                      display: "flex",
-                      alignItems: "flex-start",
-                      gap: 16,
-                    }}
-                  >
-                    <span style={{ fontSize: 28 }}>{stat.icon}</span>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 24, fontWeight: 800, color: colors.white, lineHeight: 1 }}>{stat.rawValue ?? "—"}</div>
-                      <div style={{ fontSize: 12, color: colors.muted, marginTop: 4, textTransform: "uppercase", letterSpacing: "0.05em" }}>{stat.label}</div>
-                      <div style={{ height: 3, borderRadius: 2, background: "rgba(255,255,255,0.1)", marginTop: 8 }}>
-                        <div style={{ height: "100%", width: `${pct}%`, borderRadius: 2, background: "linear-gradient(90deg, #7C3AED, #2563EB)" }} />
-                      </div>
-                    </div>
-                  </div>
-                );
-              });
-            })()}
+          <div style={{
+            background: "rgba(255,255,255,0.04)",
+            border: "1px solid rgba(255,255,255,0.08)",
+            borderRadius: 14,
+            padding: "24px 20px 16px",
+          }}>
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart
+                data={[
+                  { name: "Goals", value: 0 },
+                  { name: "Assists", value: 0 },
+                  { name: "Matches", value: 0 },
+                  { name: "Hrs Trained", value: 0 },
+                  { name: "Pass Acc%", value: 0 },
+                  { name: "Shot Acc%", value: 0 },
+                ]}
+                margin={{ top: 0, right: 8, left: -24, bottom: 0 }}
+                barCategoryGap="30%"
+              >
+                <XAxis
+                  dataKey="name"
+                  tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 11, fontFamily: "Inter, sans-serif" }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10, fontFamily: "Inter, sans-serif" }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip
+                  contentStyle={{
+                    background: "#1A1A2E",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    borderRadius: 8,
+                    fontFamily: "Inter, sans-serif",
+                    fontSize: 12,
+                    color: "#fff",
+                  }}
+                  cursor={{ fill: "rgba(255,255,255,0.04)" }}
+                  formatter={(value: unknown) => [(value as number) === 0 ? "—" : String(value), ""]}
+                />
+                <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                  {[0, 1, 2, 3, 4, 5].map((i) => (
+                    <Cell key={i} fill={i % 2 === 0 ? "#7C3AED" : "#2563EB"} fillOpacity={0.8} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+            <p style={{ textAlign: "center", fontSize: 12, color: "rgba(255,255,255,0.3)", fontFamily: "Inter, sans-serif", marginTop: 8 }}>
+              Stats update as you post highlights and log training sessions
+            </p>
           </div>
         </motion.section>
 

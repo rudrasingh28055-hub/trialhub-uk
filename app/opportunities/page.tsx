@@ -48,39 +48,42 @@ export default async function OpportunitiesPage({
   const opportunities: Opportunity[] = data ?? [];
 
   return (
-    <main className="min-h-screen text-white">
+    <main className="min-h-screen text-white" style={{ background: "#0B0B0F" }}>
       <Navbar />
 
       <section className="mx-auto max-w-7xl px-6 py-12">
         <div className="mb-8">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-300">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em]" style={{ color: "#7C3AED" }}>
             Opportunities
           </p>
-          <h1 className="mt-2 text-4xl font-bold">All live opportunities</h1>
-          <p className="mt-3 text-sm text-slate-400">
-            Browse all active trials, academies, and league listings on AthLink.
+          <h1 className="mt-2 text-4xl font-bold" style={{ fontFamily: "'Satoshi', sans-serif", fontWeight: 900, color: "#F8FAFC", letterSpacing: "-0.03em" }}>All live opportunities</h1>
+          <p className="mt-3 text-sm" style={{ color: "rgba(255,255,255,0.45)", fontFamily: "Inter, sans-serif" }}>
+            Browse active trials, academies, and league listings on Debut.
           </p>
         </div>
 
-        <form className="mb-8 grid gap-3 rounded-3xl border border-white/10 bg-white/5 p-4 md:grid-cols-4">
+        <form className="mb-8 grid gap-3 rounded-2xl border p-4 md:grid-cols-4" style={{ background: "rgba(255,255,255,0.04)", borderColor: "rgba(255,255,255,0.08)" }}>
           <input
             name="q"
             defaultValue={q}
             placeholder="Search by title or description"
-            className="w-full rounded-2xl border border-white/10 bg-slate-950/40 px-4 py-2 text-sm text-white placeholder:text-slate-500"
+            className="w-full rounded-xl px-4 py-2 text-sm text-white placeholder:text-slate-500 outline-none"
+            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
           />
 
           <input
             name="city"
             defaultValue={city}
             placeholder="City"
-            className="w-full rounded-2xl border border-white/10 bg-slate-950/40 px-4 py-2 text-sm text-white placeholder:text-slate-500"
+            className="w-full rounded-xl px-4 py-2 text-sm text-white placeholder:text-slate-500 outline-none"
+            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
           />
 
           <select
             name="type"
             defaultValue={type}
-            className="w-full rounded-2xl border border-white/10 bg-slate-950/40 px-4 py-2 text-sm text-white"
+            className="w-full rounded-xl px-4 py-2 text-sm text-white outline-none"
+            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
           >
             <option value="">All types</option>
             <option value="TRIAL">Trials</option>
@@ -90,7 +93,8 @@ export default async function OpportunitiesPage({
 
           <button
             type="submit"
-            className="w-full rounded-2xl bg-blue-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-400"
+            className="w-full rounded-xl px-4 py-2 text-sm font-semibold text-white transition-all duration-150 hover:brightness-110"
+            style={{ background: "#7C3AED" }}
           >
             Apply filters
           </button>
