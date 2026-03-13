@@ -556,6 +556,9 @@ export function CreatePostComposer({ userId }: CreatePostComposerProps) {
   const [aiStep, setAiStep] = useState('')
   const [aiError, setAiError] = useState('')
 
+  // Store pre-fetched position so selectMode can use it
+  const profilePositionRef = useRef<string>("")
+
   // Pre-fill position from user's player profile
   useEffect(() => {
     async function prefillPosition() {
@@ -574,6 +577,7 @@ export function CreatePostComposer({ userId }: CreatePostComposerProps) {
           .eq("profile_id", prof.id)
           .maybeSingle()
         if (pp?.primary_position) {
+          profilePositionRef.current = pp.primary_position
           setComposer(prev => ({
             ...prev,
             highlight: { ...prev.highlight, position: pp.primary_position! }
@@ -614,7 +618,12 @@ const videoDurationRef = useRef<number>(47); // Default fallback duration
   const selectMode = (mode: ComposerMode) => {
     setComposer(prev => {
       if (prev.mode !== mode) {
-        return { ...prev, mode, step: 1, selectedFile: null, localPreviewUrl: "", quickPost: initialQuickPostState, highlight: initialHighlightState, isPublishing: false, publishError: undefined, publishSuccess: false, showEditSheet: false };
+        return {
+          ...prev, mode, step: 1, selectedFile: null, localPreviewUrl: "",
+          quickPost: initialQuickPostState,
+          highlight: { ...initialHighlightState, position: profilePositionRef.current },
+          isPublishing: false, publishError: undefined, publishSuccess: false, showEditSheet: false
+        };
       }
       return { ...prev, mode };
     });
