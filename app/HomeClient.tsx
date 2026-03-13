@@ -556,6 +556,82 @@ export default function HomeClient({ opportunities, user, role, displayName }: H
           </div>
         </motion.section>
 
+        {/* HOW IT WORKS */}
+        <section className="relative px-6" style={{ paddingTop: "96px", paddingBottom: "80px", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+          <div className="max-w-4xl mx-auto text-center">
+            <p style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontWeight: 600, letterSpacing: "0.14em", color: "#7C3AED", textTransform: "uppercase", marginBottom: 16 }}>
+              The process
+            </p>
+            <h2 style={{ fontSize: "clamp(28px,4vw,44px)", fontFamily: "'Satoshi', sans-serif", fontWeight: 900, color: "#F8FAFC", letterSpacing: "-0.03em", marginBottom: 56 }}>
+              How it works
+            </h2>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 2, position: "relative" }}>
+              {[
+                { step: "01", title: "Upload Your Highlight", desc: "Record a goal, assist, or training clip. Upload in seconds with our AI-powered editor.", icon: "🎬" },
+                { step: "02", title: "Get Discovered", desc: "Your highlight reaches scouts and clubs across 45 countries actively searching for talent.", icon: "🌍" },
+                { step: "03", title: "Sign Your Contract", desc: "Connect directly with clubs, negotiate terms, and take the next step in your career.", icon: "✍️" },
+              ].map((item, i) => (
+                <div key={item.step} style={{ position: "relative", padding: "36px 28px", background: i === 1 ? "rgba(124,58,237,0.08)" : "rgba(255,255,255,0.03)", border: "1px solid", borderColor: i === 1 ? "rgba(124,58,237,0.25)" : "rgba(255,255,255,0.07)", borderRadius: 20 }}>
+                  <div style={{ fontSize: 36, marginBottom: 16 }}>{item.icon}</div>
+                  <div style={{ fontSize: 11, fontFamily: "Inter, sans-serif", fontWeight: 700, color: "#7C3AED", letterSpacing: "0.1em", marginBottom: 10 }}>{item.step}</div>
+                  <h3 style={{ fontSize: 18, fontFamily: "'Satoshi', sans-serif", fontWeight: 800, color: "#F8FAFC", marginBottom: 10, letterSpacing: "-0.02em" }}>{item.title}</h3>
+                  <p style={{ fontSize: 14, fontFamily: "Inter, sans-serif", color: "rgba(255,255,255,0.45)", lineHeight: 1.65 }}>{item.desc}</p>
+                  {i < 2 && (
+                    <div style={{ position: "absolute", top: "50%", right: -14, transform: "translateY(-50%)", fontSize: 18, color: "rgba(255,255,255,0.15)", zIndex: 1, display: "none" }} className="md:block">→</div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* FOR SCOUTS vs FOR ATHLETES */}
+        <section className="relative px-6" style={{ paddingBottom: "96px" }}>
+          <div className="max-w-4xl mx-auto">
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16 }}>
+              {/* For Athletes */}
+              <div style={{ padding: "36px 32px", background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.2)", borderRadius: 24 }}>
+                <div style={{ fontSize: 32, marginBottom: 16 }}>🏃</div>
+                <h3 style={{ fontSize: 22, fontFamily: "'Satoshi', sans-serif", fontWeight: 900, color: "#F8FAFC", letterSpacing: "-0.02em", marginBottom: 8 }}>For Athletes</h3>
+                <p style={{ fontSize: 14, fontFamily: "Inter, sans-serif", color: "rgba(255,255,255,0.5)", lineHeight: 1.7, marginBottom: 24 }}>
+                  Stop sending cold emails. Upload your highlights and let your talent speak directly to the clubs that matter.
+                </p>
+                <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 10 }}>
+                  {["AI-powered best moment detection", "Scout view analytics & insights", "Direct club messaging", "Verified athlete badge"].map(item => (
+                    <li key={item} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, fontFamily: "Inter, sans-serif", color: "rgba(255,255,255,0.7)" }}>
+                      <span style={{ color: "#7C3AED", fontWeight: 700, flexShrink: 0 }}>✓</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/signup" style={{ display: "inline-flex", alignItems: "center", marginTop: 28, padding: "10px 22px", background: "linear-gradient(135deg,#7C3AED,#2563EB)", borderRadius: 999, fontSize: 14, fontFamily: "'Satoshi', sans-serif", fontWeight: 700, color: "#fff", textDecoration: "none" }}>
+                  Join as Athlete →
+                </Link>
+              </div>
+
+              {/* For Scouts */}
+              <div style={{ padding: "36px 32px", background: "rgba(37,99,235,0.07)", border: "1px solid rgba(37,99,235,0.2)", borderRadius: 24 }}>
+                <div style={{ fontSize: 32, marginBottom: 16 }}>🔭</div>
+                <h3 style={{ fontSize: 22, fontFamily: "'Satoshi', sans-serif", fontWeight: 900, color: "#F8FAFC", letterSpacing: "-0.02em", marginBottom: 8 }}>For Scouts & Clubs</h3>
+                <p style={{ fontSize: 14, fontFamily: "Inter, sans-serif", color: "rgba(255,255,255,0.5)", lineHeight: 1.7, marginBottom: 24 }}>
+                  Discover verified talent from 45 countries without leaving your desk. Filter by position, age, and skill.
+                </p>
+                <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 10 }}>
+                  {["Advanced position & skill filters", "Full highlight reel access", "Save & shortlist players", "Direct athlete contact"].map(item => (
+                    <li key={item} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, fontFamily: "Inter, sans-serif", color: "rgba(255,255,255,0.7)" }}>
+                      <span style={{ color: "#2563EB", fontWeight: 700, flexShrink: 0 }}>✓</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/signup" style={{ display: "inline-flex", alignItems: "center", marginTop: 28, padding: "10px 22px", background: "linear-gradient(135deg,#2563EB,#1E40AF)", borderRadius: 999, fontSize: 14, fontFamily: "'Satoshi', sans-serif", fontWeight: 700, color: "#fff", textDecoration: "none" }}>
+                  Join as Scout →
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* PERSONALIZED WELCOME SECTION */}
         {user && (
           <motion.section

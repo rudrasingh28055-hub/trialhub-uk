@@ -6,6 +6,7 @@ import MuxPlayer from '@mux/mux-player-react'
 import MuxVideoUploader from '@/components/MuxVideoUploader'
 import { motion, AnimatePresence } from "framer-motion";
 import { colors, typography, borderRadius, glassPanel, gradient, pitchGrid, motion as motionConfig } from "@/lib/design/tokens";
+import { createClient } from "@/lib/supabase/client";
 
 // Styles object for legacy compatibility
 const styles: Record<string, React.CSSProperties> = {
@@ -529,6 +530,7 @@ function TrimControl({ duration, trimStart, trimEnd, onTrimStartChange, onTrimEn
 // Main Composer
 export function CreatePostComposer({ userId }: CreatePostComposerProps) {
   const router = useRouter();
+  const supabase = createClient();
 
   const [composer, setComposer] = useState<ComposerState>({
     mode: null,
@@ -553,6 +555,34 @@ export function CreatePostComposer({ userId }: CreatePostComposerProps) {
   } | null>(null)
   const [aiStep, setAiStep] = useState('')
   const [aiError, setAiError] = useState('')
+
+  // Pre-fill position from user's player profile
+  useEffect(() => {
+    async function prefillPosition() {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("user_id", user.id)
+          .maybeSingle()
+        if (!prof) return
+        const { data: pp } = await supabase
+          .from("player_profiles")
+          .select("primary_position")
+          .eq("profile_id", prof.id)
+          .maybeSingle()
+        if (pp?.primary_position) {
+          setComposer(prev => ({
+            ...prev,
+            highlight: { ...prev.highlight, position: pp.primary_position! }
+          }))
+        }
+      } catch {}
+    }
+    prefillPosition()
+  }, [])
   const [hasClickedAI, setHasClickedAI] = useState(false)
   const [aiApplied, setAiApplied] = useState(false)
 
@@ -1629,8 +1659,8 @@ const videoDurationRef = useRef<number>(47); // Default fallback duration
                   {/* Step 3: Metadata */}
                   {composer.step === 3 && (
                     <div>
-                      <h2 style={{ fontFamily: typography.family, fontWeight: typography.black, fontSize: "24px", color: colors.white, marginBottom: "24px" }}>
-                        HIGHLIGHT METADATA
+                      <h2 style={{ fontFamily: "'Satoshi', Inter, sans-serif", fontWeight: 900, fontSize: "26px", color: colors.white, marginBottom: "24px", letterSpacing: "-0.03em" }}>
+                        Add Your Highlight
                       </h2>
 
                       {/* Video Preview */}
@@ -1758,25 +1788,29 @@ const videoDurationRef = useRef<number>(47); // Default fallback duration
                           <label className="block text-sm font-medium mb-3" style={{ color: colors.white }}>
                             Action Type
                           </label>
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                             {actionTypeOptions.map(action => (
-                              <button 
-                                key={action.value} 
-                                onClick={() => updateHighlight({ actionType: action.value as any })} 
-                                className={`p-2 border transition-all text-sm ${
-                                  composer.highlight.actionType === action.value 
-                                    ? "" 
-                                    : ""
-                                }`}
-                                style={{ 
-                                  backgroundColor: composer.highlight.actionType === action.value ? colors.accent : colors.surface,
+                              <button
+                                key={action.value}
+                                onClick={() => updateHighlight({ actionType: action.value as any })}
+                                style={{
+                                  padding: "16px 10px",
+                                  border: "1px solid",
+                                  backgroundColor: composer.highlight.actionType === action.value ? "rgba(124,58,237,0.2)" : colors.surface,
                                   borderColor: composer.highlight.actionType === action.value ? colors.accent : colors.input,
                                   color: colors.white,
-                                  borderRadius: `${borderRadius.button}px`
+                                  borderRadius: `${borderRadius.button}px`,
+                                  cursor: "pointer",
+                                  transition: "all 0.15s",
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  alignItems: "center",
+                                  gap: 8,
+                                  boxShadow: composer.highlight.actionType === action.value ? "0 0 0 1px rgba(124,58,237,0.5)" : "none",
                                 }}
                               >
-                                <div className="text-lg mb-1">{action.icon}</div>
-                                <div>{action.label}</div>
+                                <div style={{ fontSize: 24 }}>{action.icon}</div>
+                                <div style={{ fontSize: 13, fontWeight: 600, fontFamily: "Inter, sans-serif" }}>{action.label}</div>
                               </button>
                             ))}
                           </div>

@@ -114,9 +114,6 @@ export default function Navbar() {
               <div style={{ ...styles.displayHeader, fontSize: "24px", color: colors.white }} className="tracking-[-0.03em]">
                 Debut
               </div>
-              <div className="hidden text-sm md:block" style={{ color: colors.muted }}>
-                debut.football
-              </div>
             </div>
           </Link>
 
@@ -162,9 +159,6 @@ export default function Navbar() {
             <div className="min-w-0">
               <div style={{ ...styles.displayHeader, fontSize: "24px", color: colors.white }} className="tracking-[-0.03em]">
                 Debut
-              </div>
-              <div className="hidden text-sm md:block" style={{ color: colors.muted }}>
-                debut.football
               </div>
             </div>
           </Link>
