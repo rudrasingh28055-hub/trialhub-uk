@@ -3,13 +3,14 @@ import Navbar from "@/components/Navbar";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-export default async function ClubDetailPage({ params }: { params: { id: string } }) {
+export default async function ClubDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const supabase = await createClient();
 
   const { data: club } = await supabase
     .from("club_profiles")
     .select("id, club_name, city, region, country, founded_year, description, club_type, tier, logo_url, website_url, profile_id")
-    .eq("id", params.id)
+    .eq("id", id)
     .maybeSingle();
 
   if (!club) {
